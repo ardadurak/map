@@ -11,6 +11,9 @@ import { WrapperBrushZoom2Component } from './d3-demos/wrapper-brush-zoom-2/wrap
 import { WrapperDragZoom2Component } from './d3-demos/wrapper-drag-zoom-2/wrapper-drag-zoom-2.component';
 import { WrapperVoronoiSpirals3Component } from './d3-demos/wrapper-voronoi-spirals-3/wrapper-voronoi-spirals-3.component';
 
+import { DatamapComponent } from './d3-demos/datamap/datamap.component';
+import { WrapperDatamapComponent } from './d3-demos/wrapper-datamap/wrapper-datamap.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -19,7 +22,9 @@ import { WrapperVoronoiSpirals3Component } from './d3-demos/wrapper-voronoi-spir
     VoronoiSpirals3Component,
     WrapperBrushZoom2Component,
     WrapperDragZoom2Component,
-    WrapperVoronoiSpirals3Component
+    WrapperVoronoiSpirals3Component,
+    DatamapComponent,
+    WrapperDatamapComponent
   ],
   imports: [
     BrowserModule
