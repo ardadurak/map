@@ -10,14 +10,6 @@ export const Stocks = [
     "cusip": "037833100",
     "values": [
         {
-            "date": "2017/06/28",
-            "close": 145.68,
-            "volume": "16,108,630",
-            "open": 143.95,
-            "high": 146.04,
-            "low": 143.1601
-        },
-        {
             "date": "2017/06/27",
             "close": 143.73,
             "volume": 24725210,
@@ -2053,14 +2045,6 @@ export const Stocks = [
     "isin": "US06738E2046",
     "cusip": "06738E204",
     "values": [
-        {
-            "date": "2017/06/28",
-            "close": 10.531,
-            "volume": "2,170,548",
-            "open": 10.43,
-            "high": 10.56,
-            "low": 10.43
-        },
         {
             "date": "2017/06/27",
             "close": 10.38,
@@ -4098,14 +4082,6 @@ export const Stocks = [
     "cusip": "110448107",
     "values": [
         {
-            "date": "2017/06/28",
-            "close": 69.6841,
-            "volume": "1,213,738",
-            "open": 69.76,
-            "high": 70.02,
-            "low": 69.45
-        },
-        {
             "date": "2017/06/27",
             "close": 69.36,
             "volume": 2590223,
@@ -6141,14 +6117,6 @@ export const Stocks = [
     "isin": "US4592001014",
     "cusip": "459200101",
     "values": [
-        {
-            "date": "2017/06/28",
-            "close": 155.28,
-            "volume": "1,190,799",
-            "open": 155.15,
-            "high": 155.55,
-            "low": 154.78
-        },
         {
             "date": "2017/06/27",
             "close": 154.75,

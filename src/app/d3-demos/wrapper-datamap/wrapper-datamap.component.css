@@ -26,3 +26,17 @@ h3 {
   fill: #fff;
 }
 
+path {
+  stroke: white;
+  stroke-width: 0.5px;
+  fill: black;
+}
+
+.arc text {
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+.arc path {
+  stroke: #fff;
+}

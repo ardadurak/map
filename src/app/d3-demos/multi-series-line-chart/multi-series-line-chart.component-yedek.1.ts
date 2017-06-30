@@ -50,8 +50,8 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     let x: ScaleTime<number, number>; // x
     let y: ScaleLinear<number, number>; //   y;
     let z: ScaleOrdinal<number, string>; //  z;
-    let xAxis: any;
-    let yAxis: any;
+    let xAxis: Axis<number>;
+    let yAxis: Axis<number>;
     let margin: any; // ardadarda
     let line; 
     let data: any;
@@ -62,18 +62,18 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
 
       d3ParentElement = d3.select(this.parentNativeElement);
       d3Svg = this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
-      margin = {top: 20, right: 80, bottom: 30, left: 50};
       width = +d3Svg.attr('width') - margin.left - margin.right;
       height = +d3Svg.attr('height') - margin.top - margin.bottom;
-    
+      margin = {top: 20, right: 80, bottom: 30, left: 50};
+
       d3G = d3Svg.append<SVGGElement>('g').attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       x = d3.scaleTime().range([0, width]);
       y = d3.scaleLinear().range([height, 0]);
       z = d3.scaleOrdinal<number, string>(d3.schemeCategory10);
       
-      xAxis = d3.axisBottom(x)
-      yAxis  = d3.axisLeft(y)
+      //xAxis = d3.axisBottom(x);
+      //yAxis = d3.axisLeft(y);
 
       line = d3.line()
                         .curve(d3.curveBasis)
@@ -93,11 +93,11 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
       d3G.append<SVGGElement>('g')
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+        .call(d3.axisBottom(x));
 
       d3G.append<SVGGElement>('g')
         .attr("class", "axis axis--y")
-        .call(yAxis)
+        .call(d3.axisLeft(y))
         .append<SVGGElement>('text')
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
@@ -127,5 +127,9 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
 
 
     }
+
   }
+
+
+  
 }
