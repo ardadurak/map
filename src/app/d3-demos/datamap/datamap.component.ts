@@ -21,8 +21,7 @@ import * as Datamap from 'datamaps';
 @Component({
   selector: 'app-datamap',
   template: `
-    <div id="container" style="position: relative; width: 500px; height: 300px;"></div>
-    <svg id="statesvg" width="960" height="600"></svg>
+    <div id="container" style="position: relative; width: 500px; height: 500px;"></div>
   `
 })
 
@@ -31,7 +30,6 @@ export class DatamapComponent implements OnInit, OnDestroy {
   private d3: D3;
   private parentNativeElement: any;
   private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
-  @ViewChild('statesvg') canvas;
 
   constructor(element: ElementRef, private ngZone: NgZone, d3Service: D3Service) {
     this.d3 = d3Service.getD3();

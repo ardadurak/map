@@ -13,6 +13,8 @@ import { WrapperVoronoiSpirals3Component } from './d3-demos/wrapper-voronoi-spir
 
 import { DatamapComponent } from './d3-demos/datamap/datamap.component';
 import { WrapperDatamapComponent } from './d3-demos/wrapper-datamap/wrapper-datamap.component';
+import { MultiSeriesLineChartComponent } from './d3-demos/multi-series-line-chart/multi-series-line-chart.component';
+import { WrapperMultiSeriesLineChartComponent } from './d3-demos/wrapper-multi-series-line-chart/wrapper-multi-series-line-chart.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,9 @@ import { WrapperDatamapComponent } from './d3-demos/wrapper-datamap/wrapper-data
     WrapperDragZoom2Component,
     WrapperVoronoiSpirals3Component,
     DatamapComponent,
-    WrapperDatamapComponent
+    WrapperDatamapComponent,
+    MultiSeriesLineChartComponent,
+    WrapperMultiSeriesLineChartComponent
   ],
   imports: [
     BrowserModule
