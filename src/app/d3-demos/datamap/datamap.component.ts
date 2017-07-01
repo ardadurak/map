@@ -54,6 +54,9 @@ export class DatamapComponent implements OnInit, OnDestroy {
         projection: 'mercator',
         responsive: true,
         highlightFillColor: '#0091DA',
+        geographyConfig: {
+            borderWidth: 0
+        },
         fills: {
             defaultFill: "#E6E6E6",
             exists: "#00599C",
@@ -63,10 +66,10 @@ export class DatamapComponent implements OnInit, OnDestroy {
           GBR: { fillKey: "exists" }
         }
        });
-       map.bubbles([
+       /*map.bubbles([
         {
           name: 'USA',
-          radius: 3,
+          radius: 7,
           country: 'USA',
           fillKey: 'bubble',
           centered: 'USA',
@@ -83,32 +86,34 @@ export class DatamapComponent implements OnInit, OnDestroy {
           fillOpacity: 1,
           highlightOnHover: false
         }
-      ]);
+      ]);*/
       map.arc([
         {
             origin: 'USA',
             destination: {
-                latitude: 30,
-                longitude: -50
+                latitude: 20,
+                longitude: -57
             },
             options: {
               strokeWidth: 3,
               strokeColor: '#747474',
               greatArc: true,
-              animationSpeed: 2000
+              animationSpeed: 1000,
+              arcSharpness: 0
             }
         },
         {
             origin: 'GBR',
             destination: {
                 latitude: 70,
-                longitude: 0
+                longitude: -5
             },
             options: {
               strokeWidth: 3,
               strokeColor: '#747474',
               greatArc: false,
-              animationSpeed: 3000
+              animationSpeed: 1000,
+              arcSharpness: 0
             }
         }
       ],  {strokeWidth: 1, arcSharpness: 1.4});
@@ -174,10 +179,26 @@ export class DatamapComponent implements OnInit, OnDestroy {
             .style("fill", function(d:any,i){return "black";})
             .text(d.data)
         })
-        .on("mouseout", function(d) {
+      .on("mouseout", function(d) {
+           pies.select("text").remove();
+      })
+      .on("click", function(d) {
+        //pies.selectAll('.pie').transition().duration(750).attr("d", arcInitial);
+          d3.select(this).transition()
+              .duration(750)
+              .attr("d", arcFinal);
+        });
 
-                pies.select("text").remove();
-            });
+      var arcInitial = d3.arc()
+				.startAngle(function(d){ return d.startAngle; })
+				  .endAngle(function(d){ return d.endAngle; })
+				  .innerRadius(20)
+				  .outerRadius(40);
+       var arcFinal = d3.arc()
+					.startAngle(function(d){ return d.startAngle; })
+				  	.endAngle(function(d){ return d.endAngle; })
+				  	.innerRadius(10)
+				  	.outerRadius(40);   
       
   }
 }

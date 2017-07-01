@@ -27,7 +27,6 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
   private d3: D3;
   private parentNativeElement: any;
   private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
-  private x: ScaleTime<number, number>;
 
   constructor(element: ElementRef, private ngZone: NgZone, d3Service: D3Service) {
     this.d3 = d3Service.getD3();
@@ -48,8 +47,7 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     let d3G: Selection<SVGGElement, any, null, undefined>; //  g: any;
     let width: number;
     let height: number;
-    //let x: ScaleTime<number, number>; // x
-    let x = this.x;
+    let x: ScaleTime<number, number>; // x
     let y: ScaleLinear<number, number>; //   y;
     let z: ScaleOrdinal<number, string>; //  z;
     let xAxis: any;
@@ -58,40 +56,16 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     let line; 
     let data: any;
     
-    /*
     let calcStocks = Stocks.map((v) => {
       let initialPrice = v.values[v.values.length-1].open ;
+      console.log(initialPrice);
       v.values.map((v) => {
         v.change = ((v.close-initialPrice) / initialPrice) * 100; 
         return v;
       } ); 
       return v; 
-    });*/
-
-    let calcStocks = Stocks.map((v) => {
-      var length = v.values.length - 1;
-      for(let i = 0 ; i < length ; i++){
-        let currentValue = v.values[i];
-        v.values[i].change = ((currentValue.close - v.values[i+1].close) / currentValue.close) * 100; // daily return
-      }
-      return v; 
     });
-    
-    let totalDailyReturn = calcStocks.map((v) => {
-      var sum = v.values.reduce(function (previous, key) {
-          return previous + key.change;
-      }, 0);
-      return sum;
-    });
-
-    let averageDailyReturn = totalDailyReturn.map((v) => {
-        return v / 365;
-    });
-    console.log(calcStocks);
-    console.log(totalDailyReturn);
-    console.log(averageDailyReturn);
-
-
+    console.log("hey");
     data = Stocks.map((v) => v.values.map((v) => new Date(v.date) ))[0];
 
      if (this.parentNativeElement !== null) {
@@ -147,8 +121,7 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
         .data(calcStocks)
         .enter().append<SVGGElement>('g')
         .attr("fill", "none")
-        .attr("class", "stock")
-        .on("mousemove", mousemove);
+        .attr("class", "stock");
 
       stock.append<SVGGElement>('path')
         .attr("class", "line")
@@ -163,24 +136,7 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
         .style("font", "14px sans-serif")
         .text(function(d) { return d.ticker_symbol; });
 
-      var focus = d3Svg.append<SVGGElement>("g")
-          .attr("class", "focus")
-          .style("display", "none");
 
-    }
-    function mousemove(){
-      
-      var x0 = x.invert(d3.mouse(this)[0]);
-      var y0= d3.mouse(this)[1];
-      //var i = this.stock(calcStocks, x0, 1);
-      //var d0 = d3G.data[i - 1];
-      //var d1 = d3G.data[i];
-      console.log("x0" + x0);
-       //console.log("d0" + d0);
-        //console.log("d1" + d1);
-          
-
-         
     }
   }
 }
