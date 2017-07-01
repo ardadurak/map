@@ -59,11 +59,10 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     let data: any;
     
     /*
-    let calcStocks = Stocks.map((v) => {
-      let initialPrice = v.values[v.values.length-1].open ;
+    let changeStocks = Stocks.map((v) => {
+      let initialPrice = v.values[0].close ;
       v.values.map((v) => {
         v.change = ((v.close-initialPrice) / initialPrice) * 100; 
-        return v;
       } ); 
       return v; 
     });*/
