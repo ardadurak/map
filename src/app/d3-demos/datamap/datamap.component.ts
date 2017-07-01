@@ -1,6 +1,6 @@
 import { Stocks, MapData } from '../shared';
 
-import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
 
 
 import {
@@ -17,7 +17,6 @@ import {
 } from 'd3-ng2-service';
 
 import * as Datamap from 'datamaps';
-import * as Topojson from 'topojson';
 
 @Component({
   selector: 'app-datamap',
@@ -26,7 +25,12 @@ import * as Topojson from 'topojson';
   `
 })
 
-export class DatamapComponent implements OnInit, OnDestroy {
+export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
+
+  @Input() width: number = 400;
+  @Input() height: number = 400;
+  @Input() phylloRadius: number = 7;
+  @Input() pointRadius: number = 2;
 
   private d3: D3;
   private parentNativeElement: any;
@@ -41,7 +45,19 @@ export class DatamapComponent implements OnInit, OnDestroy {
       this.d3Svg.selectAll('*').remove();
     }
   }
- 
+  ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
+      console.log('here too');
+      if (
+        (changes['width'] && !changes['width'].isFirstChange()) ||
+        (changes['height'] && !changes['height'].isFirstChange()) ||
+        (changes['phylloRadius'] && !changes['phylloRadius'].isFirstChange()) ||
+        (changes['pointRadius'] && !changes['pointRadius'].isFirstChange())
+      ) {
+        if (this.d3Svg.empty && !this.d3Svg.empty()) {
+          this.changeLayout();
+        }
+      }
+    }
   ngOnInit() {
     let self = this;
     let d3 = this.d3;
@@ -199,6 +215,21 @@ export class DatamapComponent implements OnInit, OnDestroy {
 				  	.endAngle(function(d){ return d.endAngle; })
 				  	.innerRadius(10)
 				  	.outerRadius(40);   
-      
+            
+  }
+    private changeLayout() {
+      console.log('heey change');
+      /*
+    this.d3Svg
+      .attr('width', this.width)
+      .attr('height', this.height);
+    this.points = this.d3.range(2000).map(phyllotaxis(this.width, this.height, this.phylloRadius));
+
+    this.d3G.selectAll<SVGCircleElement, PhyllotaxisPoint>('circle')
+      .data(this.points)
+      .attr('cx', function (d) { return d.x; })
+      .attr('cy', function (d) { return d.y; })
+      .attr('r', this.pointRadius);*/
+
   }
 }

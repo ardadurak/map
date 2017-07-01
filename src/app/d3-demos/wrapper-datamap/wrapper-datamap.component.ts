@@ -4,6 +4,10 @@ import { Component, Input, OnInit } from '@angular/core';
 export interface DatamapLayout {
   name: string;
   label: string;
+  width: number;
+  height: number;
+  phylloRadius: number;
+  pointRadius: number;
 }
 
 
@@ -19,11 +23,19 @@ export class WrapperDatamapComponent implements OnInit {
   public datamapLayouts: DatamapLayout[] = [
     {
       name: 'small',
-      label: 'Small Visualization'
+      label: 'Small Visualization',
+      width: 400,
+      height: 400,
+      phylloRadius: 4,
+      pointRadius: 2
     },
     {
       name: 'large',
-      label: 'Large Visualization'
+      label: 'Large Visualization',
+      width: 600,
+      height: 600,
+      phylloRadius: 7,
+      pointRadius: 4
     }
   ];
 
