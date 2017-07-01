@@ -21,7 +21,7 @@ import * as Datamap from 'datamaps';
 @Component({
   selector: 'app-datamap',
   template: `
-    <div id="container" style="position: relative; width: 800px; height: 500px;"></div>
+    <div id="container" style="position: relative; width: 100%; height: 100%;"></div>
   `
 })
 
@@ -82,27 +82,30 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
           GBR: { fillKey: "exists" }
         }
        });
-       /*map.bubbles([
+       map.bubbles([
         {
           name: 'USA',
           radius: 7,
-          country: 'USA',
           fillKey: 'bubble',
-          centered: 'USA',
           borderWidth: 0,
           fillOpacity: 1,
-          highlightOnHover: false
+          highlightOnHover: false,
+          highlightFillColor: 'bubble',
+          highlightBorderColor: 'bubble',
+          latitude: 41,
+          longitude: -100
         },{
           name: 'GBR',
-          radius: 3,
-          country: 'GBR',
+          radius: 5,
           fillKey: 'bubble',
           centered: 'GBR',
           borderWidth: 0,
           fillOpacity: 1,
-          highlightOnHover: false
+          highlightOnHover: false,
+          highlightFillColor: 'bubble',
+          highlightBorderColor: 'bubble'
         }
-      ]);*/
+      ]);
       map.arc([
         {
             origin: 'USA',
@@ -157,7 +160,19 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       // add arrow http://bl.ocks.org/dem42/e10e933990ee662c9cbd
       d3ParentElement = d3.select(this.parentNativeElement);
       d3Svg = this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
-      
+
+      d3Svg.append("circle")
+        .attr("cx", 297)
+        .attr("cy", 304)
+        .attr("r", 50)
+        .attr("fill", '#747474');
+
+    d3Svg.append("circle")
+        .attr("cx", 388) 
+        .attr("cy", 99)
+        .attr("r", 50)
+        .attr("fill", '#747474');
+
        var arc : any= d3.arc()
        .innerRadius(20).outerRadius(40),               
       pie = d3.pie()
@@ -185,15 +200,16 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .enter()
       .append<SVGGElement>('path')
       .attr('d',  arc)
+      .attr('cursor', 'pointer')
       .style('fill', function(d,i: any){
         return color(i);
       })
       .on("mouseover",function(d:any,i) {
-          pies.append("text")
+          /*pies.select(this).append("text")
             .attr("dy", ".5em")
             .style("text-anchor", "middle")
             .style("fill", function(d:any,i){return "black";})
-            .text(d.data)
+            .text(d.data)*/
         })
       .on("mouseout", function(d) {
            pies.select("text").remove();

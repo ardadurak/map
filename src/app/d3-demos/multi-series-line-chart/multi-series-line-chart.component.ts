@@ -58,39 +58,69 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     let line; 
     let data: any;
     
-    /*
+    
     let changeStocks = Stocks.map((v) => {
       let initialPrice = v.values[0].close ;
+      console.log( v.name + " initial price: " + initialPrice);
       v.values.map((v) => {
         v.change = ((v.close-initialPrice) / initialPrice) * 100; 
       } ); 
       return v; 
-    });*/
+    });
 
     let calcStocks = Stocks.map((v) => {
-      var length = v.values.length - 1;
-      for(let i = 0 ; i < length ; i++){
+      var length = v.values.length;
+      v.minDailyReturn = ((v.values[1].close - v.values[0].close) / v.values[1].close) * 100; 
+      v.maxDailyReturn = v.minDailyReturn;
+      for(let i = 1 ; i < length ; i++){
         let currentValue = v.values[i];
-        v.values[i].change = ((currentValue.close - v.values[i+1].close) / currentValue.close) * 100; // daily return
+        let dailyReturn = ((currentValue.close - v.values[i-1].close) / currentValue.close) * 100; // daily return
+        v.values[i].daily_return = dailyReturn;
+        if(dailyReturn < v.minDailyReturn){
+          v.minDailyReturn = dailyReturn;
+        }
+        else if(dailyReturn > v.maxDailyReturn){
+          v.maxDailyReturn = dailyReturn;
+        }
+        /*console.log(v.values[i].daily_return);
+        console.log("Current date:" + v.values[i].date);
+        console.log("Prev date:" + v.values[i].date);
+        console.log("currentValue.close:" + currentValue.close);
+        console.log("prev close:" + v.values[i-1].close);*/
       }
       return v; 
     });
     
     let totalDailyReturn = calcStocks.map((v) => {
       var sum = v.values.reduce(function (previous, key) {
-          return previous + key.change;
+          return previous + key.daily_return;
       }, 0);
+      console.log(v.name + " Change:" + v.values[v.values.length-1].change);
       return sum;
     });
+    
 
+    let tradeDays = calcStocks[0].values.length;
     let averageDailyReturn = totalDailyReturn.map((v) => {
-        return v / 365;
+        return v / tradeDays;
     });
-    console.log(calcStocks);
-    console.log(totalDailyReturn);
-    console.log(averageDailyReturn);
 
+    let annualReturn = averageDailyReturn.map((v) => {
+        let dailyReturn = v / 100;
+        let annualPower = Math.pow((dailyReturn + 1 ), 252);
+        let annualReturnValue = Math.round((annualPower - 1) * 100 * 100)/ 100;
+        
+        //console.log("Daily: " + dailyReturn);
+        //console.log("Power: " + annualPower);
+        //console.log("Annual: " + annualReturnValue);
 
+        return annualReturnValue.toFixed(2);
+    });
+    
+    console.log("totalDailyReturn:" + totalDailyReturn);
+    console.log("Average Daily Return:" + averageDailyReturn);
+    console.log("Annual Return:" + annualReturn);
+    
     data = Stocks.map((v) => v.values.map((v) => new Date(v.date) ))[0];
 
      if (this.parentNativeElement !== null) {
@@ -166,6 +196,9 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
           .attr("class", "focus")
           .style("display", "none");
 
+    }
+
+    function drawGraph(){
     }
     function mousemove(){
       
