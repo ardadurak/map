@@ -1,14 +1,19 @@
 <div class="container">
   <div class="row">
     <div class="col col-lg-2 col-md-2 col-sm-2">
-      <my-date-picker [options]="myDatePickerOptions" (dateChanged)="onDateChanged($event)"></my-date-picker>
+      <label> Bought On: </label>
+      <my-date-picker [options]="myDatePickerOptions" (dateChanged)="startDateChanged($event)"></my-date-picker>
     </div>
-    <div class="col col-lg-10 col-md-10 col-sm-10">
+    <div class="col col-lg-2 col-md-2 col-sm-2">
+      <label> Sold On: </label>
+      <my-date-picker  [options]="myDatePickerOptions" (dateChanged)="endDateChanged($event)"></my-date-picker>
+    </div>
+    <div class="col col-lg-8 col-md-8 col-sm-8">
     </div>
   </div>
   <div class="row">
     <div class="col col-lg-12 col-md-12 col-sm-12">
-        <app-datamap [snapshotDate]="snapshotDate" > </app-datamap>
+        <app-datamap [startDate]="startDate" [endDate]="endDate" > </app-datamap>
     </div>
   </div>
 </div>

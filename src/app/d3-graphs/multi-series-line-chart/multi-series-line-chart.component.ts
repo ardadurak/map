@@ -141,8 +141,8 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     function processCalculations(){
       return Stocks.map((v) => {
         var length = v.values.length;
-        //v.minDailyReturn = ((v.values[1].close - v.values[0].close) / v.values[1].close) * 100; 
-        //v.maxDailyReturn = v.minDailyReturn;
+        //v.min_daily_return = ((v.values[1].close - v.values[0].close) / v.values[1].close) * 100; 
+        //v.max_daily_return = v.min_daily_return;
         let initialPrice = v.values[0].close ;
         let totalDailyReturn = 0;
         for(let i = 1 ; i < length ; i++){
@@ -151,18 +151,18 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
           totalDailyReturn = totalDailyReturn + dailyReturn;
           /*
           // Calculate min and max daily return values
-          if(dailyReturn < v.minDailyReturn){
-            v.minDailyReturn = dailyReturn;
+          if(dailyReturn < v.min_daily_return){
+            v.min_daily_return = dailyReturn;
           }
-          else if(dailyReturn > v.maxDailyReturn){
-            v.maxDailyReturn = dailyReturn;
+          else if(dailyReturn > v.max_daily_return){
+            v.max_daily_return = dailyReturn;
           }*/
 
           v.values[i].daily_return = dailyReturn; // daily return value
           v.values[i].change = ((currentValue.close-initialPrice) / initialPrice) * 100;  // change rate value
         }
-        v.averageDailyReturn = totalDailyReturn / length;
-        v.annualReturn = parseFloat((Math.round((Math.pow(((v.averageDailyReturn / 100) + 1 ), length) - 1) * 100 * 100)/ 100).toFixed(2));
+        v.average_daily_return = totalDailyReturn / length;
+        v.average_return = parseFloat((Math.round((Math.pow(((v.average_daily_return / 100) + 1 ), length) - 1) * 100 * 100)/ 100).toFixed(2));
 
         return v; 
       });

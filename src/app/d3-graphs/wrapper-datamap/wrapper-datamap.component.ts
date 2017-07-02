@@ -9,7 +9,8 @@ import {IMyDpOptions, IMyDateModel} from 'mydatepicker';
 
 export class WrapperDatamapComponent implements OnInit {
 
-  @Input() snapshotDate: Date;
+  @Input() startDate: Date;
+  @Input() endDate: Date;
 
   private myDatePickerOptions: IMyDpOptions = {
       // other options...
@@ -20,10 +21,14 @@ export class WrapperDatamapComponent implements OnInit {
   };
   
   ngOnInit() {
-    this.snapshotDate = new Date('2017/06/27');
+    this.startDate = new Date('2016/06/27');
+    this.endDate = new Date('2017/06/27');
   }
 
-  public onDateChanged(event: IMyDateModel) {
-    this.snapshotDate = new Date(event.jsdate);
+  public startDateChanged(event: IMyDateModel) {
+    this.startDate = new Date(event.jsdate);
+  }
+  public endDateChanged(event: IMyDateModel) {
+    this.endDate = new Date(event.jsdate);
   }
 }

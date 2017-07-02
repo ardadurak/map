@@ -12,12 +12,14 @@ import * as Datamap from 'datamaps';
 
 export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() snapshotDate: Date;
+  @Input() startDate: Date;
+  @Input() endDate: Date;
 
   private d3: D3;
   private parentNativeElement: any;
   private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
   private processedStocks : any;
+  private filteredStocks : any;
 
   constructor(element: ElementRef, private ngZone: NgZone, d3Service: D3Service) {
     this.d3 = d3Service.getD3();
@@ -41,34 +43,21 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     const xFactorUs = 0.4859626225320041, yFactorUs = 0.16291388766840606;
     let map = this.initMap();
     let grayColor = '#747474';
-    let data = [ 
-      { "Region": "GBR", "Group1": 10,"Group2": 20,"x": 525,"y": 99 },
-      { "Region": "USA","Group1": 10,"Group2": 10, "x": 410, "y": 370 }
-    ];
+    let pieData : any;
     let processedStocks : any;
+
+    processedStocks = this.processedStocks = this.processCalculations(Stocks);
+    pieData = this.createPieData(processedStocks);
     
-    processedStocks = this.processedStocks = this.processCalculations();
     d3ParentElement = d3.select(this.parentNativeElement);
     d3Svg = this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
-    svgWidth = parseFloat( d3Svg.style("width"));
-    svgHeight = parseFloat(d3Svg.style('height'));
-    let xUk = svgWidth * xFactorUk, xUs = svgWidth * xFactorUs;
-    let yUk = svgHeight * yFactorUk, yUs = svgHeight * yFactorUs;
-    data[0].x = xUk;
-    data[0].y = yUk;
-    data[1].x = xUs;
-    data[1].y = yUs;   
 
     d3Svg.append("circle")
-      .attr("cx", xUk)
-      .attr("cy", yUk)
       .attr("r", 50)
       .attr("fill", grayColor)
       .attr('class', 'circle-uk');
     
     d3Svg.append("circle")
-      .attr("cx", xUs) 
-      .attr("cy", yUs)
       .attr("r", 50)
       .attr("fill", grayColor)
       .attr('class', 'circle-us');
@@ -80,18 +69,24 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .value(function(d: any){ return d });
  
     var pies = d3Svg.selectAll('.pie')
-      .data(data)
+      .data(pieData)
       .enter()
       .append<SVGGElement>('g')
       .attr('class', 'pie')
-      .attr("transform", function(d) {
-        return "translate(" + d.x + "," + d.y + ")";
-     });
+      .attr('class', function(d: any){ return 'pie-' + d.country})
+    
+    pies.append("text")
+      .attr("dy", ".5em")
+      .style("text-anchor", "middle")
+      .style("fill", function(d:any,i){return "white";})
+      .text(function(d: any) { return d.average_daily_return});
+
+    relocateComponents();
 
     var color = d3.scaleOrdinal(d3.schemeCategory10);
     
     pies.selectAll('.slice')
-      .data(function(d){
+      .data(function(d: any){
       return pie([d.Group1, d.Group2]); })
       .enter()
       .append<SVGGElement>('path')
@@ -108,14 +103,16 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
           .text(d.data)*/
       })
       .on("mouseout", function(d) {
-        pies.select("text").remove();
+       // pies.select("text").remove();
       })
       .on("click", function(d) {
         //pies.selectAll('.pie').transition().duration(750).attr("d", arcInitial);
         d3.select(this).transition()
           .duration(750)
           .attr("d", arcFinal);
-      });
+      })
+      
+
 
     var arcInitial = d3.arc()
       .startAngle(function(d){ return d.startAngle; })
@@ -131,15 +128,16 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     window.addEventListener('resize', function(event){
   
       map.resize();
+      relocateComponents();
+    });  
+
+    function relocateComponents(){
+
       svgWidth = parseFloat( d3Svg.style("width"));
       svgHeight = parseFloat(d3Svg.style('height'));
       let xUk = svgWidth * xFactorUk, xUs = svgWidth * xFactorUs;
       let yUk = svgHeight * yFactorUk, yUs = svgHeight * yFactorUs;
-      data[0].x = xUk;
-      data[0].y = yUk;
-      data[1].x = xUs;
-      data[1].y = yUs;   
-
+      
       d3Svg.select('.circle-uk')
         .attr("cx", xUk)
         .attr("cy", yUk)
@@ -147,43 +145,131 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       d3Svg.select('.circle-us')
         .attr("cx", xUs) 
         .attr("cy", yUs)
+
+      d3Svg.select('.pie-uk')      
+        .attr("transform", ("translate(" + xUk + "," + yUk + ")"));
       
-      d3Svg.selectAll('.pie')
-        .data(data)
-        .attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-      });
-    });  
-  }
-  public processCalculations(){
-      return Stocks.map((v) => {
-        var length = v.values.length;
-        //v.minDailyReturn = ((v.values[1].close - v.values[0].close) / v.values[1].close) * 100; 
-        //v.maxDailyReturn = v.minDailyReturn;
-        let initialPrice = v.values[0].close ;
-        let totalDailyReturn = 0;
-        for(let i = 1 ; i < length ; i++){
-          let currentValue = v.values[i];
-          let dailyReturn = ((currentValue.close - v.values[i-1].close) / currentValue.close) * 100; // daily return
-          totalDailyReturn = totalDailyReturn + dailyReturn;
-          /*
-          // Calculate min and max daily return values
-          if(dailyReturn < v.minDailyReturn){
-            v.minDailyReturn = dailyReturn;
-          }
-          else if(dailyReturn > v.maxDailyReturn){
-            v.maxDailyReturn = dailyReturn;
-          }*/
-
-          v.values[i].daily_return = dailyReturn; // daily return value
-          v.values[i].change = ((currentValue.close-initialPrice) / initialPrice) * 100;  // change rate value
-        }
-        v.averageDailyReturn = totalDailyReturn / length;
-        v.annualReturn = parseFloat((Math.round((Math.pow(((v.averageDailyReturn / 100) + 1 ), length) - 1) * 100 * 100)/ 100).toFixed(2));
-
-        return v; 
-      });
+      d3Svg.select('.pie-us')      
+        .attr("transform", ("translate(" + xUs + "," + yUs + ")"));
     }
+  }
+
+
+  public calculateReturn(targetObject){
+    // Copy the target object
+    let resultString = JSON.stringify(targetObject);
+    let resultObject = JSON.parse(resultString);
+
+    return resultObject.map((v) => {
+      var length = v.values.length;
+      let initialPrice = v.values[0].close ;
+      let totalDailyReturn = 0;
+      for(let i = 1 ; i < length ; i++){
+        let currentValue = v.values[i];
+        totalDailyReturn = totalDailyReturn + v.values[i].daily_return;
+        v.values[i].change = ((currentValue.close-initialPrice) / initialPrice) * 100;  // change rate value
+      }
+      v.average_daily_return = totalDailyReturn / length;
+      v.average_return = parseFloat((Math.round((Math.pow(((v.average_daily_return / 100) + 1 ), length) - 1) * 100 * 100)/ 100).toFixed(2));
+
+      return v; 
+    });
+  }
+  public processCalculations(targetObject){
+    // Copy the target object
+    let resultString = JSON.stringify(targetObject);
+    let resultObject = JSON.parse(resultString);
+      
+    return resultObject.map((v) => {
+      var length = v.values.length;
+      let initialPrice = v.values[0].close ;
+      let totalDailyReturn = 0;
+      for(let i = 1 ; i < length ; i++){
+        let currentValue = v.values[i];
+        let dailyReturn = ((currentValue.close - v.values[i-1].close) / currentValue.close) * 100; // daily return
+        totalDailyReturn = totalDailyReturn + dailyReturn;
+        v.values[i].daily_return = dailyReturn; // daily return value
+        v.values[i].change = ((currentValue.close-initialPrice) / initialPrice) * 100;  // change rate value
+      }
+      v.average_daily_return = totalDailyReturn / length;
+      v.average_return = parseFloat((Math.round((Math.pow(((v.average_daily_return / 100) + 1 ), length) - 1) * 100 * 100)/ 100).toFixed(2));
+
+      return v; 
+    });
+  }
+
+  public createPieData(targetObject){
+    let resultString = JSON.stringify(targetObject);
+    let resultObject = JSON.parse(resultString);
+
+    let ukStocks = resultObject.filter(function(v) {
+      return v.country_code == "UK"; 
+    });
+
+    let usStocks = resultObject.filter(function(v) {
+      return v.country_code == "US"; 
+    });
+    
+    let chartObject = [ 
+      { "country": "uk", "average_daily_return" : ((parseFloat(ukStocks[0].average_daily_return) + parseFloat(ukStocks[1].average_daily_return)) / 2).toFixed(2), "Group1": 10,"Group2": 10},
+      { "country": "us", "average_daily_return" : ((parseFloat(usStocks[0].average_daily_return) + parseFloat(usStocks[1].average_daily_return)) / 2).toFixed(2), "Group1": 10,"Group2": 20}
+    ];
+    console.log("Chart Object: " + chartObject);
+    return chartObject;
+  }
+
+  public filterStocks( targetObject, startDate, endDate){
+  
+    let startDateTime = startDate.setHours(0, 0, 0, 0);
+    let endDateTime = endDate.setHours(0, 0, 0, 0);
+
+    // Copy the target object
+    let filteredResultString = JSON.stringify(targetObject);
+    let filteredResult = JSON.parse(filteredResultString);
+
+    // Filter the result depending on the dates
+    filteredResult = filteredResult.map((v) => {
+        let filtered = v.values.filter(isBetweenDates);
+        v.values = filtered;
+        return v;
+    })
+    
+    function isBetweenDates(value) {
+      let currentDate = new Date(value.date).setHours(0, 0, 0, 0);
+      return (currentDate >= startDateTime && currentDate <= endDateTime);
+    }
+    
+    return filteredResult;
+  } 
+
+  public changeFunction(startDate, endDate) {
+
+    let filteredStocks = this.filterStocks(this.processedStocks, startDate, endDate);
+    filteredStocks = this.calculateReturn(filteredStocks);
+    
+    console.log("Filtered Stocks Length: " + filteredStocks[0].values.length);
+    console.log("Filtered Stocks Average Return: " + filteredStocks[0].average_return);
+    console.log("Filtered Stocks Average Daily Return: " + filteredStocks[0].average_daily_return);
+
+    this.filteredStocks = filteredStocks;
+    let pieData = this.createPieData(filteredStocks);
+
+    console.log("Pie Data: " + pieData);
+
+    this.d3Svg.selectAll('.pie')
+      .select("text").remove()
+      .data(pieData)
+      .append("text")
+      .attr("dy", ".5em")
+      .style("text-anchor", "middle")
+      .style("fill", function(d:any,i){return "white";})
+      .text(function(d: any) { return d.average_daily_return});
+      
+  }
+  
+  public drawPieCharts(){
+    
+  }
   private initMap(){
     var map =  new Datamap({
       element: document.getElementById('container'),
@@ -260,49 +346,21 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       return map;
     }
   
-   public changeFunction(newDate) {
-
     
-    let newDateTime = newDate.setHours(0, 0, 0, 0);
-    console.log(newDateTime);
-    
-    let result = this.processedStocks.map((v) => {
-      return v.values.find(item => {
-        return new Date(item.date).setHours(0, 0, 0, 0) == newDateTime;
-      })
-    })
-    /*console.log(newDateTime);
-    let mappedResult = this.processedStocks.map((v) => {
-      v.values.map((v) => {
-        if( new Date(v.date).setHours(0, 0, 0, 0) == newDateTime){
-          console.log('found');
-        }
-        return v.daily_return
-      });
-    })*/
-    console.log(result);
-      /*
-    this.d3G.selectAll<SVGCircleElement, PhyllotaxisPoint>('circle')
-      .data(this.points)
-      .attr('cx', function (d) { return d.x; })
-      .attr('cy', function (d) { return d.y; })
-      .attr('r', this.pointRadius);*/
-  }
 
   ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
-    if (changes['snapshotDate'] && !changes['snapshotDate'].isFirstChange()) {
-      this.changeFunction(changes['snapshotDate'].currentValue);
+    
+    var startDate = changes['startDate'] ?  changes['startDate'].currentValue : this.startDate;
+    var endDate = changes['endDate'] ?  changes['endDate'].currentValue : this.endDate;
+    
+    console.log("Start Date: " + startDate);
+    console.log("End Date: " + endDate);
+    
+    if (startDate && ( !changes['startDate'] ||  !changes['startDate'].isFirstChange())
+     && endDate && ( !changes['endDate'] ||  !changes['endDate'].isFirstChange())){
+      this.changeFunction(startDate, endDate);
     }
-      /*
-      this.processedStocks.map((v) => {
-        v.values.map((v) => {
-          console.log(v.date);
-          if( new Date(v.date) == newDateTime){
-            console.log('found');
-          }
-          return v.daily_return
-        });
-      });*/
+    
 
 
       /*let result =  this.processedStocks.find(item => {
