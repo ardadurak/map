@@ -1,11 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-
 export interface MultiSeriesLineChartLayout {
   name: string;
   label: string;
 }
-
 
 @Component({
   selector: 'app-wrapper-multi-series-line-chart',
@@ -17,14 +15,6 @@ export class WrapperMultiSeriesLineChartComponent implements OnInit {
   @Input() selectedLayout: MultiSeriesLineChartLayout;
 
   public multiSeriesLineChartLayouts: MultiSeriesLineChartLayout[] = [
-    {
-      name: 'small',
-      label: 'Small Visualization'
-    },
-    {
-      name: 'large',
-      label: 'Large Visualization'
-    }
   ];
 
   ngOnInit() {

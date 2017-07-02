@@ -1,4 +1,4 @@
-import { Stocks, MapData } from '../shared';
+import { Stocks } from '../shared';
 import { Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
 import { D3Service, D3, Axis, BrushBehavior, BrushSelection, D3BrushEvent, ScaleLinear, ScaleOrdinal, Selection, Transition} from 'd3-ng2-service';
 import * as Datamap from 'datamaps';
