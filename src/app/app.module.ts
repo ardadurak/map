@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
+import { MyDatePickerModule } from 'mydatepicker';
 import { D3Service } from 'd3-ng2-service';
 
 import { AppComponent } from './app.component';
@@ -11,10 +11,10 @@ import { WrapperBrushZoom2Component } from './d3-demos/wrapper-brush-zoom-2/wrap
 import { WrapperDragZoom2Component } from './d3-demos/wrapper-drag-zoom-2/wrapper-drag-zoom-2.component';
 import { WrapperVoronoiSpirals3Component } from './d3-demos/wrapper-voronoi-spirals-3/wrapper-voronoi-spirals-3.component';
 */
-import { DatamapComponent } from './d3-demos/datamap/datamap.component';
-import { WrapperDatamapComponent } from './d3-demos/wrapper-datamap/wrapper-datamap.component';
-import { MultiSeriesLineChartComponent } from './d3-demos/multi-series-line-chart/multi-series-line-chart.component';
-import { WrapperMultiSeriesLineChartComponent } from './d3-demos/wrapper-multi-series-line-chart/wrapper-multi-series-line-chart.component';
+import { DatamapComponent } from './d3-graphs/datamap/datamap.component';
+import { WrapperDatamapComponent } from './d3-graphs/wrapper-datamap/wrapper-datamap.component';
+import { MultiSeriesLineChartComponent } from './d3-graphs/multi-series-line-chart/multi-series-line-chart.component';
+import { WrapperMultiSeriesLineChartComponent } from './d3-graphs/wrapper-multi-series-line-chart/wrapper-multi-series-line-chart.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +31,7 @@ import { WrapperMultiSeriesLineChartComponent } from './d3-demos/wrapper-multi-s
     WrapperMultiSeriesLineChartComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,MyDatePickerModule
   ],
   providers: [
     D3Service

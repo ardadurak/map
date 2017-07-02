@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-
+import {IMyDpOptions, IMyDateModel} from 'mydatepicker';
 
 export interface DatamapLayout {
   name: string;
@@ -19,7 +19,13 @@ export interface DatamapLayout {
 export class WrapperDatamapComponent implements OnInit {
 
   @Input() selectedLayout: DatamapLayout;
+  @Input() snapshotDate: Date;
 
+  private myDatePickerOptions: IMyDpOptions = {
+      // other options...
+      dateFormat: 'dd/mm/yyyy',
+  };
+  
   public datamapLayouts: DatamapLayout[] = [
     {
       name: 'small',
@@ -40,14 +46,18 @@ export class WrapperDatamapComponent implements OnInit {
   ];
 
   ngOnInit() {
+    this.snapshotDate = new Date('2017/06/27');
     if (this.selectedLayout === undefined) {
-      this.selectedLayout = this.datamapLayouts[0];
+      this.selectedLayout = this.datamapLayouts[1];
     }
   }
 
   public onActiveButtonChange(layout: DatamapLayout): void {
     this.selectedLayout = layout;
+    alert("yis");
   }
 
-
+  onDateChanged(event: IMyDateModel) {
+    this.snapshotDate = new Date(event.jsdate);
+  }
 }

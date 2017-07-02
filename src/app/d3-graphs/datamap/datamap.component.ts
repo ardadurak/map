@@ -16,6 +16,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
   @Input() height: number = 400;
   @Input() phylloRadius: number = 7;
   @Input() pointRadius: number = 2;
+  @Input() snapshotDate: Date;
 
   private d3: D3;
   private parentNativeElement: any;
@@ -248,7 +249,9 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
   }
   ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
-      console.log('here too');
+
+      console.log('here dateee:'  + changes['snapshotDate']);
+
       if (
         (changes['width'] && !changes['width'].isFirstChange()) ||
         (changes['height'] && !changes['height'].isFirstChange()) ||

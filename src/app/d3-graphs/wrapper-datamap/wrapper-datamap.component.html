@@ -6,7 +6,7 @@
   </div>
   <div class="row">
     <div class="col col-lg-12 col-md-12 col-sm-12">
-        <app-datamap [width]="selectedLayout.width" [height]="selectedLayout.height" [phylloRadius]="selectedLayout.phylloRadius"
+        <app-datamap [snapshotDate]="snapshotDate" [width]="selectedLayout.width" [height]="selectedLayout.height" [phylloRadius]="selectedLayout.phylloRadius"
           [pointRadius]="selectedLayout.pointRadius"> </app-datamap>
     </div>
     <div class="col col-lg-12 col-md-12 col-sm-12">
@@ -15,6 +15,7 @@
           <thead>
             <tr>
               <th colspan="4" class="text-center">
+                <my-date-picker [options]="myDatePickerOptions" (dateChanged)="onDateChanged($event)"></my-date-picker>
                 <small><em>Choose Layout:</em></small>
                 <span class="btn-group">
                   <button class="btn btn-primary btn-sm" *ngFor="let layout of datamapLayouts"
