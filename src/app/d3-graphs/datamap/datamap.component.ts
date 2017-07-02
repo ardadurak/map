@@ -12,15 +12,12 @@ import * as Datamap from 'datamaps';
 
 export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() width: number = 400;
-  @Input() height: number = 400;
-  @Input() phylloRadius: number = 7;
-  @Input() pointRadius: number = 2;
   @Input() snapshotDate: Date;
 
   private d3: D3;
   private parentNativeElement: any;
   private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
+  private processedStocks : any;
 
   constructor(element: ElementRef, private ngZone: NgZone, d3Service: D3Service) {
     this.d3 = d3Service.getD3();
@@ -48,7 +45,9 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       { "Region": "GBR", "Group1": 10,"Group2": 20,"x": 525,"y": 99 },
       { "Region": "USA","Group1": 10,"Group2": 10, "x": 410, "y": 370 }
     ];
-
+    let processedStocks : any;
+    
+    processedStocks = this.processedStocks = this.processCalculations();
     d3ParentElement = d3.select(this.parentNativeElement);
     d3Svg = this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
     svgWidth = parseFloat( d3Svg.style("width"));
@@ -102,36 +101,35 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
         return color(i);
       })
       .on("mouseover",function(d:any,i) {
-          /*pies.select(this).append("text")
-            .attr("dy", ".5em")
-            .style("text-anchor", "middle")
-            .style("fill", function(d:any,i){return "black";})
-            .text(d.data)*/
-        })
+        /*pies.select(this).append("text")
+          .attr("dy", ".5em")
+          .style("text-anchor", "middle")
+          .style("fill", function(d:any,i){return "black";})
+          .text(d.data)*/
+      })
       .on("mouseout", function(d) {
-           pies.select("text").remove();
+        pies.select("text").remove();
       })
       .on("click", function(d) {
         //pies.selectAll('.pie').transition().duration(750).attr("d", arcInitial);
-          d3.select(this).transition()
-              .duration(750)
-              .attr("d", arcFinal);
-        });
+        d3.select(this).transition()
+          .duration(750)
+          .attr("d", arcFinal);
+      });
 
-      var arcInitial = d3.arc()
-				.startAngle(function(d){ return d.startAngle; })
-				  .endAngle(function(d){ return d.endAngle; })
-				  .innerRadius(20)
-				  .outerRadius(40);
-       var arcFinal = d3.arc()
-					.startAngle(function(d){ return d.startAngle; })
-				  	.endAngle(function(d){ return d.endAngle; })
-				  	.innerRadius(10)
-				  	.outerRadius(40);  
+    var arcInitial = d3.arc()
+      .startAngle(function(d){ return d.startAngle; })
+      .endAngle(function(d){ return d.endAngle; })
+      .innerRadius(20)
+      .outerRadius(40);
+    var arcFinal = d3.arc()
+      .startAngle(function(d){ return d.startAngle; })
+      .endAngle(function(d){ return d.endAngle; })
+      .innerRadius(10)
+      .outerRadius(40);  
 
-  
     window.addEventListener('resize', function(event){
-      
+  
       map.resize();
       svgWidth = parseFloat( d3Svg.style("width"));
       svgHeight = parseFloat(d3Svg.style('height'));
@@ -157,110 +155,158 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       });
     });  
   }
+  public processCalculations(){
+      return Stocks.map((v) => {
+        var length = v.values.length;
+        //v.minDailyReturn = ((v.values[1].close - v.values[0].close) / v.values[1].close) * 100; 
+        //v.maxDailyReturn = v.minDailyReturn;
+        let initialPrice = v.values[0].close ;
+        let totalDailyReturn = 0;
+        for(let i = 1 ; i < length ; i++){
+          let currentValue = v.values[i];
+          let dailyReturn = ((currentValue.close - v.values[i-1].close) / currentValue.close) * 100; // daily return
+          totalDailyReturn = totalDailyReturn + dailyReturn;
+          /*
+          // Calculate min and max daily return values
+          if(dailyReturn < v.minDailyReturn){
+            v.minDailyReturn = dailyReturn;
+          }
+          else if(dailyReturn > v.maxDailyReturn){
+            v.maxDailyReturn = dailyReturn;
+          }*/
+
+          v.values[i].daily_return = dailyReturn; // daily return value
+          v.values[i].change = ((currentValue.close-initialPrice) / initialPrice) * 100;  // change rate value
+        }
+        v.averageDailyReturn = totalDailyReturn / length;
+        v.annualReturn = parseFloat((Math.round((Math.pow(((v.averageDailyReturn / 100) + 1 ), length) - 1) * 100 * 100)/ 100).toFixed(2));
+
+        return v; 
+      });
+    }
   private initMap(){
-        var map =  new Datamap({
-
-        element: document.getElementById('container'),
-        projection: 'mercator',
-        responsive: true,
-        highlightFillColor: 'defaultFill',
-        geographyConfig: {
-            borderWidth: 0
-        },
-        fills: {
-            defaultFill: "#E6E6E6",
-            exists: "#00599C",
-            bubble: "#747474"
-        },data: {
-          USA: { fillKey: "exists" },
-          GBR: { fillKey: "exists" }
-        }
-       });
-       map.bubbles([
-        {
-          name: 'USA',
-          radius: 7,
-          fillKey: 'bubble',
-          borderWidth: 0,
-          fillOpacity: 1,
-          highlightOnHover: false,
-          highlightFillColor: 'bubble',
-          highlightBorderColor: 'bubble',
-          latitude: 41,
-          longitude: -100
-        },{
-          name: 'GBR',
-          radius: 5,
-          fillKey: 'bubble',
-          centered: 'GBR',
-          borderWidth: 0,
-          fillOpacity: 1,
-          highlightOnHover: false,
-          highlightFillColor: 'bubble',
-          highlightBorderColor: 'bubble'
-        }
-      ]);
-      map.arc([
-        {
-            origin: 'USA',
-            destination: {
-                latitude: 20,
-                longitude: -57
-            },
-            options: {
-              strokeWidth: 3,
-              strokeColor: '#747474',
-              greatArc: true,
-              animationSpeed: 1000,
-              arcSharpness: 0
-            }
-        },
-        {
-            origin: 'GBR',
-            destination: {
-                latitude: 70,
-                longitude: -5
-            },
-            options: {
-              strokeWidth: 3,
-              strokeColor: '#747474',
-              greatArc: false,
-              animationSpeed: 1000,
-              arcSharpness: 0
-            }
-        }
-      ],  {strokeWidth: 1, arcSharpness: 1.4});
-        return map;
+    var map =  new Datamap({
+      element: document.getElementById('container'),
+      projection: 'mercator',
+      responsive: true,
+      highlightFillColor: 'defaultFill',
+      geographyConfig: {
+          borderWidth: 0
+      },
+      fills: {
+          defaultFill: "#E6E6E6",
+          exists: "#00599C",
+          bubble: "#747474"
+      },data: {
+        USA: { fillKey: "exists" },
+        GBR: { fillKey: "exists" }
       }
-    private changeLayout() {
-      console.log('heey change');
-      /*
-    this.d3Svg
-      .attr('width', this.width)
-      .attr('height', this.height);
-    this.points = this.d3.range(2000).map(phyllotaxis(this.width, this.height, this.phylloRadius));
+    });
+    map.bubbles([
+      {
+        name: 'USA',
+        radius: 7,
+        fillKey: 'bubble',
+        borderWidth: 0,
+        fillOpacity: 1,
+        highlightOnHover: false,
+        highlightFillColor: 'bubble',
+        highlightBorderColor: 'bubble',
+        latitude: 41,
+        longitude: -100
+      },{
+        name: 'GBR',
+        radius: 5,
+        fillKey: 'bubble',
+        centered: 'GBR',
+        borderWidth: 0,
+        fillOpacity: 1,
+        highlightOnHover: false,
+        highlightFillColor: 'bubble',
+        highlightBorderColor: 'bubble'
+      }
+    ]);
 
+    map.arc([
+      {
+          origin: 'USA',
+          destination: {
+              latitude: 20,
+              longitude: -57
+          },
+          options: {
+            strokeWidth: 3,
+            strokeColor: '#747474',
+            greatArc: true,
+            animationSpeed: 1000,
+            arcSharpness: 0
+          }
+      },
+      {
+          origin: 'GBR',
+          destination: {
+              latitude: 70,
+              longitude: -5
+          },
+          options: {
+            strokeWidth: 3,
+            strokeColor: '#747474',
+            greatArc: false,
+            animationSpeed: 1000,
+            arcSharpness: 0
+          }
+      }
+    ],  {strokeWidth: 1, arcSharpness: 1.4});
+      return map;
+    }
+  
+   public changeFunction(newDate) {
+
+    
+    let newDateTime = newDate.setHours(0, 0, 0, 0);
+    console.log(newDateTime);
+    
+    let result = this.processedStocks.map((v) => {
+      return v.values.find(item => {
+        return new Date(item.date).setHours(0, 0, 0, 0) == newDateTime;
+      })
+    })
+    /*console.log(newDateTime);
+    let mappedResult = this.processedStocks.map((v) => {
+      v.values.map((v) => {
+        if( new Date(v.date).setHours(0, 0, 0, 0) == newDateTime){
+          console.log('found');
+        }
+        return v.daily_return
+      });
+    })*/
+    console.log(result);
+      /*
     this.d3G.selectAll<SVGCircleElement, PhyllotaxisPoint>('circle')
       .data(this.points)
       .attr('cx', function (d) { return d.x; })
       .attr('cy', function (d) { return d.y; })
       .attr('r', this.pointRadius);*/
-      
-
   }
+
   ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
+    if (changes['snapshotDate'] && !changes['snapshotDate'].isFirstChange()) {
+      this.changeFunction(changes['snapshotDate'].currentValue);
+    }
+      /*
+      this.processedStocks.map((v) => {
+        v.values.map((v) => {
+          console.log(v.date);
+          if( new Date(v.date) == newDateTime){
+            console.log('found');
+          }
+          return v.daily_return
+        });
+      });*/
 
-      console.log('here dateee:'  + changes['snapshotDate']);
 
-      if (
-        (changes['width'] && !changes['width'].isFirstChange()) ||
-        (changes['height'] && !changes['height'].isFirstChange()) ||
-        (changes['phylloRadius'] && !changes['phylloRadius'].isFirstChange()) ||
-        (changes['pointRadius'] && !changes['pointRadius'].isFirstChange())
-      ) {
-        if (this.d3Svg.empty && !this.d3Svg.empty()) {
-          this.changeLayout();
-        }
-      }
+      /*let result =  this.processedStocks.find(item => {
+        return new Date(item.values.date).setHours(0, 0, 0, 0) == newDateTime;
+      });*/
     }
 }
