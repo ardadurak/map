@@ -9,7 +9,7 @@ export const Stocks =
     "country": "United States",
     "isin": "US0378331005",
     "cusip": "037833100",
-    "average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
+    "average_volume": 0,"average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
     "values": [
       {
         "date": "2016/06/27",
@@ -2552,7 +2552,7 @@ export const Stocks =
     "country_code": "UK",
     "isin": "US06738E2046",
     "cusip": "06738E204",
-    "average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
+    "average_volume": 0,"average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
     "values": [
       {
         "date": "2016/06/27",
@@ -5105,7 +5105,7 @@ export const Stocks =
     "country_code": "UK",
     "isin": "US1104481072",
     "cusip": "110448107",
-    "average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
+    "average_volume": 0,"average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
     "values": [
       {
         "date": "2016/06/27",
@@ -7658,7 +7658,7 @@ export const Stocks =
     "country": "United States",
     "isin": "US4592001014",
     "cusip": "459200101",
-    "average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
+    "average_volume": 0,"average_return": 0,"average_daily_return": 0,"min_daily_return": 0,"max_daily_return": 0,
     "values": [
       {
         "date": "2016/06/27",
