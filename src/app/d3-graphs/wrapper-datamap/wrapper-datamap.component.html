@@ -11,20 +11,10 @@
     <div class="col col-lg-8 col-md-8 col-sm-8">
     </div>
   </div>
-  <div class="row">
-    <div class="col col-lg-4 col-md-4 col-sm-4">
-         <app-wrapper-multi-series-line-chart [graphAttribute]="graphTypes.change"  ></app-wrapper-multi-series-line-chart>
-    </div>
-    <div class="col col-lg-4 col-md-4 col-sm-4">
-        <app-wrapper-multi-series-line-chart [graphAttribute]="graphTypes.daily_return"  ></app-wrapper-multi-series-line-chart>
-    </div>
-    <div class="col col-lg-4 col-md-4 col-sm-4">
-        <app-wrapper-multi-series-line-chart [graphAttribute]="graphTypes.close"  ></app-wrapper-multi-series-line-chart>
-    </div>
-  </div>
+  
   <div class="row">
     <div class="col col-lg-12 col-md-12 col-sm-12">
-        <app-datamap [startDate]="startDate" [endDate]="endDate" > </app-datamap>
+        <app-datamap [startDate]="startDate" [endDate]="endDate" [stockData]="stockData" > </app-datamap>
     </div>
   </div>
 </div>

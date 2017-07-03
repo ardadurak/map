@@ -1,20 +1,21 @@
-import { Stocks } from '../shared';
-import { Component, Input, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, ElementRef, NgZone, OnDestroy, OnInit, OnChanges, ViewChild, SimpleChange } from '@angular/core';
 import { D3Service, D3, Axis, BrushBehavior, BrushSelection, D3BrushEvent, ScaleTime, ScaleLinear, ScaleOrdinal, Selection, Transition} from 'd3-ng2-service';
 
 @Component({
   selector: 'app-multiserieslinechart',
-  template: `<svg width="384" height="240"></svg>`
+  template: `<svg class="line-chart" width="384" height="240"></svg>`
 })
 
 export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
 
   @Input() graphAttribute: string;
+  @Input() stockData: string;
 
   private d3: D3;
   private parentNativeElement: any;
   private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
   private x: ScaleTime<number, number>;
+  private updateFunction;
 
   constructor(element: ElementRef, private ngZone: NgZone, d3Service: D3Service) {
     this.d3 = d3Service.getD3();
@@ -44,18 +45,18 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     let line; 
     let dateData: any;
     let graphAttribute = this.graphAttribute;
+    this.updateFunction = updateGraph;
     
-    var processedStocks = processCalculations();
-    dateData = Stocks.map((v) => v.values.map((v) => new Date(v.date) ))[0];
     if (this.parentNativeElement !== null) {
       d3ParentElement = d3.select(this.parentNativeElement);
       d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
-      drawGraph(this.parentNativeElement);
+      drawGraph(this.stockData);
     }
 
-    
-    function drawGraph(parentNativeElement){
-     
+    function drawGraph(targetData){
+      
+      let processedStocks: any = JSON.parse(targetData);
+      dateData = processedStocks.map((v) => v.values.map((v) => new Date(v.date) ))[0];
       margin = {top: 20, right: 80, bottom: 30, left: 50};
       width = +d3Svg.attr('width') - margin.left - margin.right;
       height = +d3Svg.attr('height') - margin.top - margin.bottom;
@@ -68,9 +69,9 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
       y = d3.scaleLinear().range([height, 0]);
       z = d3.scaleOrdinal<number, string>(d3.schemeCategory10);
       
-      xAxis = d3.axisBottom(x)
+      xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b"));
       yAxis  = d3.axisLeft(y)
-
+   
       line = d3.line()
         .curve(d3.curveBasis)
         .x( (d: any) => x(new Date(d.date)) )
@@ -78,10 +79,9 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
 
       x.domain(d3.extent(dateData, (d: Date) => d ));
 
-      y.domain([
-        d3.min(processedStocks, function(c) { return d3.min(c.values, function(d) { return d[graphAttribute]; }); }),
-        d3.max(processedStocks, function(c) { return d3.max(c.values, function(d) { return d[graphAttribute]; }); })
-      ]);
+      let y0 = parseFloat(d3.min(processedStocks, function(c: any) { return d3.min(c.values, function(d) { return d[graphAttribute]; }); }));
+      let y1 = parseFloat(d3.max(processedStocks, function(c: any) { return d3.max(c.values, function(d) { return d[graphAttribute]; }); }));
+      y.domain([y0, y1]);
 
       z.domain(processedStocks.map(function(c) { return c.id; }));
 
@@ -112,11 +112,11 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
 
       stock.append('path')
         .attr("class", "line")
-        .attr("d", (d) => line(d.values) )
-        .style("stroke", (d) => z(d.id) );
+        .attr("d", (d : any) => line(d.values) )
+        .style("stroke", (d : any) => z(d.id) );
 
       stock.append('text')
-        .datum(function(d) { return {id: d.id, ticker_symbol: d.ticker_symbol, value: d.values[d.values.length - 1]}; })
+        .datum(function(d : any) { return {id: d.id, ticker_symbol: d.ticker_symbol, value: d.values[d.values.length - 1]}; })
         .attr("transform", (d) => "translate(" + x(new Date(d.value.date)) + "," + y(d.value[graphAttribute]*1) + ")" )
         .attr("x", 3)
         .attr("dy", "0.35em")
@@ -129,6 +129,70 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
           .style("display", "none");
     }
 
+    function updateGraph(targetData){
+
+      let processedStocks: any = JSON.parse(targetData);
+      dateData = processedStocks.map((v) => v.values.map((v) => new Date(v.date) ))[0];
+     
+      x = d3.scaleTime().range([0, width]);
+      y = d3.scaleLinear().range([height, 0]);
+      z = d3.scaleOrdinal<number, string>(d3.schemeCategory10);
+    	// Scale the range of the data again 
+      x.domain(d3.extent(dateData, (d: Date) => d ));
+      let y0 = parseFloat(d3.min(processedStocks, function(c: any) { return d3.min(c.values, function(d) { return d[graphAttribute]; }); }));
+      let y1 = parseFloat(d3.max(processedStocks, function(c: any) { return d3.max(c.values, function(d) { return d[graphAttribute]; }); }));
+      y.domain([y0, y1]);
+      z.domain(processedStocks.map(function(c) { return c.id; }));
+      
+      console.log("check difference")
+      xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b"));
+      
+      let days = Math.ceil((dateData[dateData.length-1].setHours(0, 0, 0, 0) - dateData[0].setHours(0, 0, 0, 0)) / (1000 * 3600 * 24)); 
+      console.log(days);
+      if(days > 250){
+          xAxis.tickFormat(d3.timeFormat("%b"));
+      }
+      else{
+            
+      }
+      
+      let newD3Svg = d3Svg.transition();
+      let newd3G = d3Svg.selectAll(".stock").transition();
+      let line = d3.line()
+        .curve(d3.curveBasis)
+        .x( (d: any) => x(new Date(d.date)) )
+        .y( (d: any) => y(d[graphAttribute]) );
+
+        // Make the changes
+        newd3G.select(".line")   // change the line
+            .duration(750)
+            .attr("d", (d : any) => line(d.values) )
+           .style("stroke", (d : any) => z(d.id) );
+            
+        newD3Svg.select(".axis--x") // change the x axis
+            .duration(750)
+            .call(xAxis);
+
+        newD3Svg.select(".axis--y") // change the y axis
+            .duration(750)
+            .call(yAxis);
+            
+            /*
+            var svg = d3.select("body").transition();
+
+    // Make the changes
+        svg.select(".line")   // change the line
+            .duration(750)
+            .attr("d", valueline(data));
+        svg.select(".x.axis") // change the x axis
+            .duration(750)
+            .call(xAxis);
+        svg.select(".y.axis") // change the y axis
+            .duration(750)
+            .call(yAxis);*/
+
+    }
+
     function mousemove(){
       var x0 = x.invert(d3.mouse(this)[0]);
       var y0= d3.mouse(this)[1];
@@ -139,35 +203,11 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
        //console.log("d0" + d0);
         //console.log("d1" + d1);
     }
+  }
 
-    function processCalculations(){
-      return Stocks.map((v) => {
-        var length = v.values.length;
-        //v.min_daily_return = ((v.values[1].close - v.values[0].close) / v.values[1].close) * 100; 
-        //v.max_daily_return = v.min_daily_return;
-        let initialPrice = v.values[0].close ;
-        let totalDailyReturn = 0;
-        for(let i = 1 ; i < length ; i++){
-          let currentValue = v.values[i];
-          let dailyReturn = ((currentValue.close - v.values[i-1].close) / currentValue.close) * 100; // daily return
-          totalDailyReturn = totalDailyReturn + dailyReturn;
-          /*
-          // Calculate min and max daily return values
-          if(dailyReturn < v.min_daily_return){
-            v.min_daily_return = dailyReturn;
-          }
-          else if(dailyReturn > v.max_daily_return){
-            v.max_daily_return = dailyReturn;
-          }*/
-
-          v.values[i].daily_return = dailyReturn; // daily return value
-          v.values[i].change = ((currentValue.close-initialPrice) / initialPrice) * 100;  // change rate value
-        }
-        v.average_daily_return = totalDailyReturn / length;
-        v.average_return = parseFloat((Math.round((Math.pow(((v.average_daily_return / 100) + 1 ), length) - 1) * 100 * 100)/ 100).toFixed(2));
-
-        return v; 
-      });
+  ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
+    if ( changes['stockData'] &&  !changes['stockData'].isFirstChange()){
+      this.updateFunction(changes["stockData"].currentValue);
     }
   }
 }

@@ -1,10 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-export interface MultiSeriesLineChartLayout {
-  name: string;
-  label: string;
-}
-
 @Component({
   selector: 'app-wrapper-multi-series-line-chart',
   templateUrl: './wrapper-multi-series-line-chart.component.html',
@@ -13,15 +8,13 @@ export interface MultiSeriesLineChartLayout {
 export class WrapperMultiSeriesLineChartComponent implements OnInit {
 
   @Input() graphAttribute: string;
-
-  public multiSeriesLineChartLayouts: MultiSeriesLineChartLayout[] = [
-  ];
+  @Input() stockData: string;
 
   ngOnInit() {
     this.graphAttribute = this.graphAttribute || 'change';
   }
 
-  public onActiveButtonChange(layout: MultiSeriesLineChartLayout): void {
+  public onActiveButtonChange(): void {
   }
 
 
