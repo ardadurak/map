@@ -10,21 +10,17 @@ import { WrapperMultiSeriesLineChartComponent } from '../wrapper-multi-series-li
   template: `
     
     <div class="row">
-      <div class="col col-lg-8 col-md-8 col-sm-12">
+      <div class="col col-lg-8 col-md-12 col-sm-12">
         <div id="map" class="map" style="position: relative; width: 100%; height: 100%;"></div>
       </div>
-      <div class="col col-lg-4 col-md-4col-sm-12">  
+      <div class="col col-lg-4 col-md-4 col-sm-12">  
         <div class="row">
           <div class="col col-lg-12 col-md-12 col-sm-12">
               <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.change"  ></app-wrapper-multi-series-line-chart>
           </div>
-        </div>
-        <div class="row"> 
           <div class="col col-lg-12 col-md-12 col-sm-12">
               <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.daily_return"  ></app-wrapper-multi-series-line-chart>
           </div>
-        </div>
-        <div class="row"> 
           <div class="col col-lg-12 col-md-12 col-sm-12">
               <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.volume"  ></app-wrapper-multi-series-line-chart>
           </div>
@@ -106,10 +102,29 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       "volume": "volume"
     }
     this.stockData = JSON.stringify(processedStocks);
+    
     window.addEventListener('resize', function(event){
-      //map.resize();
-      //relocate();
-    });     
+      map.resize();
+      
+      let svgWidth = parseFloat( d3Svg.style("width"));
+      let svgHeight = parseFloat(d3Svg.style('height'));
+      let xUk = svgWidth * xFactorUk, xUs = svgWidth * xFactorUs;
+      let yUk = svgHeight * yFactorUk, yUs = svgHeight * yFactorUs;
+      
+      d3Svg.select('.circle-uk')
+        .attr("cx", xUk)
+        .attr("cy", yUk)
+
+      d3Svg.select('.circle-us')
+        .attr("cx", xUs) 
+        .attr("cy", yUs)
+
+      d3Svg.select('.pie-uk')      
+        .attr("transform", ("translate(" + xUk + "," + yUk + ")"));
+      
+      d3Svg.select('.pie-us')      
+        .attr("transform", ("translate(" + xUs + "," + yUs + ")"));
+    });
   }
 
   public relocateComponents(){
@@ -377,7 +392,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
     pies
       .append("text")
-      .attr("dy", "-3.7em")
+      .attr("dx", "9em")
       .attr("class", "average-text")
       .style("text-anchor", "middle")
       .style("fill", "black")
