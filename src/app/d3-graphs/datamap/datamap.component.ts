@@ -148,6 +148,10 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       return v.country_code == "US"; 
     });
 
+    /*function createObject(target){
+
+    }
+*/
     let chartObject = [ 
       { 
         "country": "uk", 
@@ -155,11 +159,11 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
         "data" :[
           {
             "name": ukStocks[0].name,
-            "value": ukStocks[0].average_volume
+            "value": ukStocks[0].values[ukStocks.length-1].close
           },
           {
             "name": ukStocks[1].name,
-            "value": ukStocks[1].average_volume
+            "value": ukStocks[1].values[ukStocks.length-1].close
           },
         ]
       },
@@ -169,11 +173,11 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
         "data" :[
           {
             "name": usStocks[0].name,
-            "value": usStocks[0].average_volume
+            "value": usStocks[0].values[usStocks.length-1].close
           },
           {
             "name": usStocks[1].name,
-            "value": usStocks[1].average_volume
+            "value": usStocks[1].values[usStocks.length-1].close
           },
         ]
       }
@@ -219,65 +223,59 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     console.log("Filtered Stocks Average Daily Return: " + filteredStocks[0].average_daily_return);
     console.log("Pie Data: " + pieData);
     */
-    
+    /*
     d3Svg.selectAll('.pie-uk').select('text').text(pieData[0].averageDailyReturn); // winner
     d3Svg.selectAll('.pie-us').select('text').text(pieData[1].averageDailyReturn); // winner
-   
-    let pie = d3.pie();
+   */
+/*
     let arc : any= d3.arc()
       .outerRadius(40)
       .innerRadius(20);
-    let color = d3.scaleOrdinal(d3.schemeCategory10);
 
-      var pies = d3Svg.selectAll('.pie')
+    let pie = d3.pie()
+      .value(function(d: any){ debugger; return d.value });
+    debugger;
+    d3.selectAll('.pie-uk')
       .data(pieData)
-      .enter()
-      .append<SVGGElement>('g')
-      .attr('class', 'pie')
-      .attr('class', function(d: any){ return 'pie-' + d.country})
 
-    pies.selectAll('.slice')
-        .data(function(d: any){
-          return pie([d.data[0].value, d.data[1].value]) })
-        .enter()
-        .enter()
-        .append<SVGGElement>('path')
-        .attr('d',  arc)
-        .attr('cursor', 'pointer')
-        .style('fill', function(d,i: any){
-          return color(i);
-        })
+    let path = d3.selectAll('.pie-uk').selectAll('.path')
+      .data(function(d: any){debugger;
+         return pie(d.data[0]) });
+
+    path.attr("d", arc);
+*/
+    let arc : any= d3.arc()
+      .outerRadius(40)
+      .innerRadius(20);
+
+    let pie = d3.pie()
+      .value(function(d: any){ return d.value });
+    let theData = pieData[0];
 /*
-    let pies = this.d3Svg.selectAll('.pie');
-    pies.data(pieData);
-
-    let pie = this.d3.pie();
-
-     pies.selectAll('.slice').data(function(d: any){
-        return pie([d.stock1Value, d.stock2Value]); })
-      .enter();
-      ies.selectAll('.slice')
+    d3Svg
+      .selectAll('.pie-uk')
+      .data(theData.data)
+      .selectAll('.slice')
       .data(function(d: any){
-        debugger; return pie([d[0].data, d[1].data]); })
-      .enter()
-      .append<SVGGElement>('path')
-      .attr('d',  arc)
-      .attr('cursor', 'pointer')
-      .style('fill', function(d,i: any){
-        return color(i);
-      })*/
-    // Store the displayed angles in _current.
-    // Then, interpolate from _current to the new angles.
-    // During the transition, _current is updated in-place by d3.interpolate.
-    function arcTween(a) {
-      var arc = this.d3.arc()
-       .innerRadius(20).outerRadius(40);
-      var i = this.d3.interpolate(this._current, a);
-      this._current = i(0);
-      return function(t) {
-        return arc(i(t));
-      };
-    }    
+        debugger;
+         return pie([d.data[0], d.data[1]]) })
+      .selectAll('path')
+      .attr('d',  arc);*/
+    
+   
+/*
+     
+				 path = path.data(pie(frequency)); // update the data
+				  path.transition().duration(750).attrTween("d", arcTween); // redraw the arcs
+			function arcTween(a) {
+			  var i = d3.interpolate(this._current, a);
+			  this._current = i(0);
+			  return function(t) {
+			    return arc(i(t));
+			  };
+			}
+     
+     */ 
   }
   
   public drawCircles(){
@@ -291,7 +289,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .attr("fill",  '#747474')
       .attr('class', 'circle-us');
   }
-  
+
   public drawPieCharts(pieData){
 
     this.d3Svg.selectAll('.pie').remove();
@@ -302,9 +300,11 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
     var arc : any= d3.arc()
        .innerRadius(20).outerRadius(40);
+    var labelArc : any= d3.arc()
+       .innerRadius(55).outerRadius(55);
 
     var pie = d3.pie()
-      .value(function(d: any){ return d });
+      .value(function(d: any){ return d.value });
  
     var pies = d3Svg.selectAll('.pie')
       .data(pieData)
@@ -313,15 +313,16 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .attr('class', 'pie')
       .attr('class', function(d: any){ return 'pie-' + d.country})
     
-    pies.append("text")
+    pies
+      .append("text")
       .attr("dy", ".5em")
       .style("text-anchor", "middle")
-      .style("fill", function(d:any,i){return "white";})
-      .text(function(d: any) { return d.averageDailyReturn});
-
+      .style("fill", "white")
+      .text(function(d: any) { return d.averageDailyReturn})
+    
     pies.selectAll('.slice')
       .data(function(d: any){
-         return pie([d.data[0].value, d.data[1].value]) })
+         return pie([d.data[0], d.data[1]]) })
       .enter()
       .append<SVGGElement>('path')
       .attr('d',  arc)
@@ -329,12 +330,16 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .style('fill', function(d,i: any){
         return color(i);
       })
-      .on("mouseover",function(d:any,i) {
-        
-      })
-      .on("mouseout", function(d) {
-      })
-      
+
+    pies.selectAll('.slice')
+      .data(function(d: any){
+         return pie([d.data[0], d.data[1]]) })
+      .enter()    
+      .append("text")
+	    .text(function(d: any) { return d.data.name;})	
+      .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
+	    .style("fill", "black");
+
       this.relocateComponents();
   }
   private initMap(){

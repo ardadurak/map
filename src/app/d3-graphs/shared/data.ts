@@ -7651,7 +7651,7 @@ export const Stocks =
   },
   {
     "id": 3,
-    "name": "International Business Machines Corporation",
+    "name": "IBM",
     "ticker_symbol": "IBM",
     "type": "Equity",
     "country_code": "US",
