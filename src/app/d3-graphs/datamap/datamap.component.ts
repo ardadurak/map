@@ -26,7 +26,7 @@ import { WrapperMultiSeriesLineChartComponent } from '../wrapper-multi-series-li
         </div>
         <div class="row"> 
           <div class="col col-lg-12 col-md-12 col-sm-12">
-              <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.close"  ></app-wrapper-multi-series-line-chart>
+              <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.volume"  ></app-wrapper-multi-series-line-chart>
           </div>
         </div>
       </div>
@@ -34,26 +34,6 @@ import { WrapperMultiSeriesLineChartComponent } from '../wrapper-multi-series-li
     
   `
 })
-/*
-OLD
-<div class="row">
-      <div class="col col-lg-4 col-md-4 col-sm-12">
-          <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.change"  ></app-wrapper-multi-series-line-chart>
-      </div>
-      <div class="col col-lg-4 col-md-4 col-sm-12">
-          <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.daily_return"  ></app-wrapper-multi-series-line-chart>
-      </div>
-      <div class="col col-lg-4 col-md-4 col-sm-12">
-          <app-wrapper-multi-series-line-chart [stockData]="stockData" [graphAttribute]="graphTypes.close"  ></app-wrapper-multi-series-line-chart>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col col-lg-12 col-md-12 col-sm-12">
-        <div id="map" class="map" style="position: relative; width: 100%; height: 100%;"></div>
-      </div>
-   </div>
-
- */
 @NgModule({
   declarations: [
     MultiSeriesLineChartComponent,
@@ -113,11 +93,13 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     d3Svg = this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
     d3SvgGraph = this.d3SvgGraph = d3ParentElement.select<SVGSVGElement>('.graph');
     
+    this.drawCircles();
     this.drawPieCharts(pieData);
     this.graphTypes = {
       "change": "change",
       "daily_return": "daily_return",
-      "close": "close"
+      "close": "close",
+      "volume": "volume"
     }
     this.stockData = JSON.stringify(processedStocks);
     window.addEventListener('resize', function(event){
@@ -289,33 +271,34 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     console.log("Pie Data: " + pieData);
     */
     
-    d3Svg.selectAll('.pie-uk').select('text').text(pieData[0].averageDailyReturn); // winner
-    d3Svg.selectAll('.pie-us').select('text').text(pieData[1].averageDailyReturn); // winner
+    d3Svg.selectAll('.pie-uk').select('.daily-text').text(pieData[0].averageDailyReturn); 
+    d3Svg.selectAll('.pie-us').select('.daily-text').text(pieData[1].averageDailyReturn); 
    
-/*
+    d3Svg.selectAll('.pie-uk').select('.average-text').text("Average Return: " + pieData[0].averageReturn)
+    d3Svg.selectAll('.pie-us').select('.average-text').text("Average Return: " + pieData[1].averageReturn)
+    
+    this.drawPieCharts(pieData);
+    this.relocateComponents();
+   /* 
     let arc : any= d3.arc()
       .outerRadius(40)
       .innerRadius(20);
 
     let pie = d3.pie()
-      .value(function(d: any){ debugger; return d.value });
-    debugger;
+      .value(function(d: any){  return d.value });
+    
     d3.selectAll('.pie-uk')
       .data(pieData)
 
     let path = d3.selectAll('.pie-uk').selectAll('.path')
-      .data(function(d: any){debugger;
+      .data(function(d: any){
          return pie(d.data[0]) });
 
-    path.attr("d", arc);
-*/
-    let arc : any= d3.arc()
-      .outerRadius(40)
-      .innerRadius(20);
+    path
+    .transition()
+    .duration(750)
+    .attr("d", arc);*/
 
-    let pie = d3.pie()
-      .value(function(d: any){ return d.value });
-    let theData = pieData[0];
 /*
     d3Svg
       .selectAll('.pie-uk')
@@ -357,11 +340,12 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
   public drawPieCharts(pieData){
 
-    this.d3Svg.selectAll('.pie').remove();
+    this.d3Svg.selectAll('.pie-uk').remove();
+    this.d3Svg.selectAll('.pie-us').remove();
+    
     let d3 = this.d3;
     let d3Svg = this.d3Svg;
     let color = d3.scaleOrdinal(d3.schemeCategory10);
-    this.drawCircles();
 
     var arc : any= d3.arc()
        .innerRadius(20).outerRadius(40);
@@ -381,13 +365,15 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     pies
       .append("text")
       .attr("dy", "0.5em")
+      .attr("class", "daily-text")
       .style("text-anchor", "middle")
       .style("fill", "white")
       .text(function(d: any) { return d.averageDailyReturn})
 
     pies
       .append("text")
-      .attr("dx", "7em")
+      .attr("dy", "-3.7em")
+      .attr("class", "average-text")
       .style("text-anchor", "middle")
       .style("fill", "black")
       .text(function(d: any) { return "Average Return: " + d.averageReturn})
@@ -400,17 +386,22 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .attr('d',  arc)
       .attr('cursor', 'pointer')
       .style('fill', function(d,i: any){
-        return color(i);
+        return color(i)
       })
-
+      .on("mouseover", mouseOver);
+      
+    function mouseOver(){
+      console.log("here");
+    }
+    /*
     pies.selectAll('.slice')
       .data(function(d: any){
          return pie([d.data[0], d.data[1]]) })
       .enter()    
       .append("text")
-	    .text(function(d: any) { return d.data.name;})	
+	    .text(function(d: any) { return d.data.name;})
       .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
-	    .style("fill", "black");
+	    .style("fill", "black");*/
 
       this.relocateComponents();
   }

@@ -3,7 +3,7 @@ import { D3Service, D3, Axis, BrushBehavior, BrushSelection, D3BrushEvent, Scale
 
 @Component({
   selector: 'app-multiserieslinechart',
-  template: `<svg class="line-chart" width="384" height="240"></svg>`
+  template: `<svg class="line-chart" width="400" height="180"></svg>`
 })
 
 export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
@@ -108,7 +108,7 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
         .enter().append<SVGGElement>('g')
         .attr("fill", "none")
         .attr("class", "stock")
-        .on("mousemove", mousemove);
+        .on("mouseclick", mousemove);
 
       stock.append('path')
         .attr("class", "line")
@@ -142,33 +142,80 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
       let y0 = parseFloat(d3.min(processedStocks, function(c: any) { return d3.min(c.values, function(d) { return d[graphAttribute]; }); }));
       let y1 = parseFloat(d3.max(processedStocks, function(c: any) { return d3.max(c.values, function(d) { return d[graphAttribute]; }); }));
       y.domain([y0, y1]);
-      z.domain(processedStocks.map(function(c) { return c.id; }));
       
       console.log("check difference")
-      xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b"));
+      xAxis = d3.axisBottom(x);
       
       let days = Math.ceil((dateData[dateData.length-1].setHours(0, 0, 0, 0) - dateData[0].setHours(0, 0, 0, 0)) / (1000 * 3600 * 24)); 
       console.log(days);
-      if(days > 250){
-          xAxis.tickFormat(d3.timeFormat("%b"));
+      /*
+      if(days > 180){
+        xAxis.tickFormat(d3.timeFormat("%d"));
       }
       else{
-            
+        xAxis.tickFormat(d3.timeFormat("%d-%b"));
+      }
+      */
+      if(days < 8){
+        console.log("a");
+        xAxis.ticks(Math.ceil(days));
+        xAxis.tickFormat(d3.timeFormat("%d-%b"));
+      }
+      else if(days < 60){
+        console.log("b");
+        xAxis.ticks(8);
+        xAxis.tickFormat(d3.timeFormat("%d-%b"));
+      }
+      else if(days < 120){
+        console.log("c");
+        xAxis.ticks(7);
+        xAxis.tickFormat(d3.timeFormat("%d-%b"));
+      }
+      else if(days < 180){
+        console.log("d");
+        xAxis.ticks(6);
+        xAxis.tickFormat(d3.timeFormat("%d-%b"));
+      }
+      else{
+        console.log("e");
+        xAxis.ticks(Math.ceil(days/30));
+        xAxis.tickFormat(d3.timeFormat("%b"));
       }
       
       let newD3Svg = d3Svg.transition();
-      let newd3G = d3Svg.selectAll(".stock").transition();
-      let line = d3.line()
-        .curve(d3.curveBasis)
-        .x( (d: any) => x(new Date(d.date)) )
-        .y( (d: any) => y(d[graphAttribute]) );
+      d3G.selectAll(".stock").remove();
+        
+      // would be better with transitions
+      let stock = d3G.selectAll(".stock")
+        .data(processedStocks)
+        .enter().append<SVGGElement>('g')
+        .attr("fill", "none")
+        .attr("class", "stock")
+        .on("mouseclick", mousemove);
+
+      stock.append('path')
+        .attr("class", "line")
+        .attr("d", (d : any) => line(d.values) )
+        .style("stroke", (d : any) => z(d.id) );
+
+      stock.append('text')
+        .datum(function(d : any) { return {id: d.id, ticker_symbol: d.ticker_symbol, value: d.values[d.values.length - 1]}; })
+        .attr("transform", (d) => "translate(" + x(new Date(d.value.date)) + "," + y(d.value[graphAttribute]*1) + ")" )
+        .attr("x", 3)
+        .attr("dy", "0.35em")
+        .style("font", "14px sans-serif")
+        .attr('class', 'heeey')
+        .text(function(d) { return d.ticker_symbol; });
+
+      /*
+      let newd3G = d3G.selectAll(".stock").transition();
 
         // Make the changes
-        newd3G.select(".line")   // change the line
+        newd3G.selectAll(".line")   // change the line
             .duration(750)
             .attr("d", (d : any) => line(d.values) )
            .style("stroke", (d : any) => z(d.id) );
-            
+          */
         newD3Svg.select(".axis--x") // change the x axis
             .duration(750)
             .call(xAxis);
@@ -176,30 +223,17 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
         newD3Svg.select(".axis--y") // change the y axis
             .duration(750)
             .call(yAxis);
-            
-            /*
-            var svg = d3.select("body").transition();
-
-    // Make the changes
-        svg.select(".line")   // change the line
-            .duration(750)
-            .attr("d", valueline(data));
-        svg.select(".x.axis") // change the x axis
-            .duration(750)
-            .call(xAxis);
-        svg.select(".y.axis") // change the y axis
-            .duration(750)
-            .call(yAxis);*/
-
     }
 
     function mousemove(){
       var x0 = x.invert(d3.mouse(this)[0]);
       var y0= d3.mouse(this)[1];
+      console.log("x0: " + x0);
+      console.log("y0: " + y0);
       //var i = this.stock(processedStocks, x0, 1);
       //var d0 = d3G.data[i - 1];
       //var d1 = d3G.data[i];
-      console.log("x0" + x0);
+      
        //console.log("d0" + d0);
         //console.log("d1" + d1);
     }
