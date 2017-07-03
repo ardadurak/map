@@ -11,6 +11,7 @@ export class WrapperDatamapComponent implements OnInit {
 
   @Input() startDate: Date;
   @Input() endDate: Date;
+  @Input() graphTypes: any;
 
   private defaultStartDate = new Date('2016/06/27');
   private defaultEndDate= new Date('2017/06/27');
@@ -26,6 +27,11 @@ export class WrapperDatamapComponent implements OnInit {
   ngOnInit() {
     this.startDate = this.defaultStartDate;
     this.endDate = this.defaultEndDate;
+    this.graphTypes = {
+      "change": "change",
+      "daily_return": "daily_return",
+      "close": "close"
+    }
   }
 
   public startDateChanged(event: IMyDateModel) {

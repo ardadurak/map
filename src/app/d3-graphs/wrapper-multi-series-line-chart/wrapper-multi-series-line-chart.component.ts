@@ -12,19 +12,16 @@ export interface MultiSeriesLineChartLayout {
 })
 export class WrapperMultiSeriesLineChartComponent implements OnInit {
 
-  @Input() selectedLayout: MultiSeriesLineChartLayout;
+  @Input() graphAttribute: string;
 
   public multiSeriesLineChartLayouts: MultiSeriesLineChartLayout[] = [
   ];
 
   ngOnInit() {
-    if (this.selectedLayout === undefined) {
-      this.selectedLayout = this.multiSeriesLineChartLayouts[0];
-    }
+    this.graphAttribute = this.graphAttribute || 'change';
   }
 
   public onActiveButtonChange(layout: MultiSeriesLineChartLayout): void {
-    this.selectedLayout = layout;
   }
 
 

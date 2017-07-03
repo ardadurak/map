@@ -1,23 +1,33 @@
 import { Stocks } from '../shared';
-import { Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
-import { D3Service, D3, Axis, BrushBehavior, BrushSelection, D3BrushEvent, ScaleLinear, ScaleOrdinal, Selection, Transition} from 'd3-ng2-service';
+import { NgModule, Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
+import { D3Service, D3, Axis, BrushBehavior, BrushSelection, D3BrushEvent, ScaleTime, ScaleLinear, ScaleOrdinal, Selection, Transition} from 'd3-ng2-service';
 import * as Datamap from 'datamaps';
+import { MultiSeriesLineChartComponent } from '../multi-series-line-chart/multi-series-line-chart.component';
+import { WrapperMultiSeriesLineChartComponent } from '../wrapper-multi-series-line-chart/wrapper-multi-series-line-chart.component';
 
 @Component({
   selector: 'app-datamap',
   template: `
-    <div id="container" style="position: relative; width: 100%; height: 100%;"></div>
+    <div id="map" class="map" style="position: relative; width: 100%; height: 100%;"></div>
   `
 })
-
+@NgModule({
+  declarations: [
+    MultiSeriesLineChartComponent,
+    WrapperMultiSeriesLineChartComponent
+  ]
+})
 export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() startDate: Date;
   @Input() endDate: Date;
+  @Input() graphTypes: any;
 
   private d3: D3;
   private parentNativeElement: any;
+  private d3ParentElement: any;
   private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
+  private d3SvgGraph: Selection<SVGSVGElement, any, null, undefined>;
   private processedStocks : any;
   private filteredStocks : any;
   private xFactorUk: number;
@@ -41,6 +51,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     let d3 = this.d3;
     let d3ParentElement: Selection<HTMLElement, any, null, undefined>;
     let d3Svg: Selection<SVGSVGElement, any, null, undefined>;
+    let d3SvgGraph: Selection<SVGSVGElement, any, null, undefined>;
     let d3G: Selection<SVGGElement, any, null, undefined>;
     let svgWidth: number, svgHeight: number;
     const xFactorUk = this.xFactorUk = 0.4859626225320041, yFactorUk = this.yFactorUk = 0.16291388766840606;
@@ -49,22 +60,122 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     let relocate = this.relocateComponents;
     let pieData : any;
     let processedStocks : any;
+    let graphTypes = this.graphTypes;
     
-
     processedStocks = this.processedStocks = this.processCalculations(Stocks);
     pieData = this.createPieData(processedStocks);
-    
+   
     d3ParentElement = d3.select(this.parentNativeElement);
     d3Svg = this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
-
+    d3SvgGraph = this.d3SvgGraph = d3ParentElement.select<SVGSVGElement>('.graph');
+    
     this.drawPieCharts(pieData);
-  
+    //this.drawGraph(processedStocks);
+
     window.addEventListener('resize', function(event){
       //map.resize();
       //relocate();
     });     
   }
+  public drawGraph(targetData: any){
 
+    
+
+    let d3SvgGraph: Selection<SVGSVGElement, any, null, undefined>;
+    let d3GGraph: Selection<SVGGElement, any, null, undefined>;
+    let width: number;
+    let height: number;
+    let margin: any; 
+    let x: ScaleTime<number, number>; // x
+    let y: ScaleLinear<number, number>; //   y;
+    let z: ScaleOrdinal<number, string>; //  z;
+    let xAxis: any;
+    let yAxis: any;
+    let dateData: any;
+    let graphAttribute = 'change';
+    let line; 
+    let d3 = this.d3;
+
+
+    margin = {top: 20, right: 80, bottom: 30, left: 50};
+    //this.d3Svg.select<SVGSVGElement>('graph').selectAll('*').remove();
+    
+    d3SvgGraph = this.d3SvgGraph;
+    d3GGraph = d3SvgGraph
+            .append<SVGGElement>('g')
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    dateData = targetData.map((v) => v.values.map((v) => new Date(v.date) ))[0];
+
+    
+    width = +d3SvgGraph.attr('width') - margin.left - margin.right;
+    height = +d3SvgGraph.attr('height') - margin.top - margin.bottom;
+
+    x = d3.scaleTime().range([0, width]);
+    y = d3.scaleLinear().range([height, 0]);
+    z = d3.scaleOrdinal<number, string>(d3.schemeCategory10);
+
+    xAxis = d3.axisBottom(x)
+    yAxis  = d3.axisLeft(y)
+
+    line = d3.line()
+        .curve(d3.curveBasis)
+        .x( (d: any) => x(new Date(d.date)) )
+        .y( (d: any) => y(d[graphAttribute]) );
+
+      x.domain(d3.extent(dateData, (d: Date) => d ));
+
+      let y0 = d3.min(targetData, function(c : any) { return d3.min(c.values, function(d) { return d[graphAttribute]; }); });
+      let y1 = d3.max(targetData, function(c : any) { return d3.max(c.values, function(d) { return d[graphAttribute]; }); });
+      
+      y.domain([parseFloat(y0),parseFloat(y1)]);
+
+      z.domain(targetData.map(function(c) { return c.id; }));
+
+      //drawAxis();
+      d3GGraph.append<SVGGElement>('g')
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+      d3GGraph.append('g')
+        .attr("class", "axis axis--y")
+        .call(yAxis)
+        .append<SVGGElement>('text')
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "0.71em")
+        .attr("color", "#ff0000")
+        .text("%");
+        
+      //drawPath();
+
+      let stock = d3GGraph.selectAll(".stock")
+        .data(targetData)
+        .enter().append<SVGGElement>('g')
+        .attr("fill", "none")
+        .attr("class", "stock");
+        //.on("mousemove", mousemove);
+
+      stock.append('path')
+        .attr("class", "line")
+        .attr("d", (d:any) => line(d.values) )
+        .style("stroke", (d:any) => z(d.id) );
+
+      stock.append('text')
+        .datum(function(d:any) { return {id: d.id, ticker_symbol: d.ticker_symbol, value: d.values[d.values.length - 1]}; })
+        .attr("transform", (d) => "translate(" + x(new Date(d.value.date)) + "," + y(d.value[graphAttribute]*1) + ")" )
+        .attr("x", 3)
+        .attr("dy", "0.35em")
+        .style("font", "14px sans-serif")
+        .attr('class', 'heeey')
+        .text(function(d) { return d.ticker_symbol; });
+
+      var focus = d3SvgGraph.append("g")
+          .attr("class", "focus")
+          .style("display", "none");
+      
+  }
   public relocateComponents(){
     let d3Svg = this.d3Svg;
     let svgWidth = parseFloat( d3Svg.style("width"));
@@ -217,6 +328,8 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     let pieData = this.createPieData(filteredStocks);
     let d3Svg = this.d3Svg;
     let d3 = this.d3;
+
+    this.drawGraph(filteredStocks);
     /*
     console.log("Filtered Stocks Length: " + filteredStocks[0].values.length);
     console.log("Filtered Stocks Average Return: " + filteredStocks[0].average_return);
@@ -344,7 +457,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
   }
   private initMap(){
     var map =  new Datamap({
-      element: document.getElementById('container'),
+      element: document.getElementById('map'),
       projection: 'mercator',
       responsive: true,
       highlightFillColor: 'defaultFill',

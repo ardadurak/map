@@ -1,13 +1,15 @@
 import { Stocks } from '../shared';
-import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { D3Service, D3, Axis, BrushBehavior, BrushSelection, D3BrushEvent, ScaleTime, ScaleLinear, ScaleOrdinal, Selection, Transition} from 'd3-ng2-service';
 
 @Component({
   selector: 'app-multiserieslinechart',
-  template: `<svg width="960" height="600"></svg>`
+  template: `<svg width="384" height="240"></svg>`
 })
 
 export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
+
+  @Input() graphAttribute: string;
 
   private d3: D3;
   private parentNativeElement: any;
@@ -41,7 +43,7 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     let margin: any; 
     let line; 
     let dateData: any;
-    let graphAttribute = 'change';
+    let graphAttribute = this.graphAttribute;
     
     var processedStocks = processCalculations();
     dateData = Stocks.map((v) => v.values.map((v) => new Date(v.date) ))[0];
