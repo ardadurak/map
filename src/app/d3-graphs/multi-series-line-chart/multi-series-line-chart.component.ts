@@ -72,6 +72,11 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
       xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b"));
       yAxis  = d3.axisLeft(y)
    
+      if(graphAttribute === "volume"){
+        var format = d3.formatPrefix(",.0", 1e6);
+        yAxis.tickFormat (function (d) { return format(d)});
+      }  
+      
       line = d3.line()
         .curve(d3.curveBasis)
         .x( (d: any) => x(new Date(d.date)) )
@@ -117,11 +122,11 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
 
       stock.append('text')
         .datum(function(d : any) { return {id: d.id, ticker_symbol: d.ticker_symbol, value: d.values[d.values.length - 1]}; })
-        .attr("transform", (d) => "translate(" + x(new Date(d.value.date)) + "," + y(d.value[graphAttribute]*1) + ")" )
+        .attr("transform", (d) => "translate(270," + (d.id * 20) + ")" )
         .attr("x", 3)
         .attr("dy", "0.35em")
         .style("font", "14px sans-serif")
-        .attr('class', 'heeey')
+        .style("fill", (d : any) => z(d.id) )
         .text(function(d) { return d.ticker_symbol; });
 
       var focus = d3Svg.append("g")
@@ -200,11 +205,11 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
 
       stock.append('text')
         .datum(function(d : any) { return {id: d.id, ticker_symbol: d.ticker_symbol, value: d.values[d.values.length - 1]}; })
-        .attr("transform", (d) => "translate(" + x(new Date(d.value.date)) + "," + y(d.value[graphAttribute]*1) + ")" )
+        .attr("transform", (d) => "translate(270," + (d.id * 20) + ")" )
         .attr("x", 3)
         .attr("dy", "0.35em")
         .style("font", "14px sans-serif")
-        .attr('class', 'heeey')
+        .style("fill", (d : any) => z(d.id) )
         .text(function(d) { return d.ticker_symbol; });
 
       /*

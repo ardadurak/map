@@ -52,12 +52,14 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
   private d3ParentElement: any;
   private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
   private d3SvgGraph: Selection<SVGSVGElement, any, null, undefined>;
+  private d3SvgDetails: Selection<SVGSVGElement, any, null, undefined>;
   private processedStocks : any;
   private filteredStocks : any;
   private xFactorUk: number;
   private yFactorUk: number;
   private xFactorUs: number;
   private yFactorUs: number;
+  
 
   constructor(element: ElementRef, private ngZone: NgZone, d3Service: D3Service) {
     this.d3 = d3Service.getD3();
@@ -76,6 +78,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     let d3ParentElement: Selection<HTMLElement, any, null, undefined>;
     let d3Svg: Selection<SVGSVGElement, any, null, undefined>;
     let d3SvgGraph: Selection<SVGSVGElement, any, null, undefined>;
+    let d3SvgDetails: Selection<SVGSVGElement, any, null, undefined>;
     let d3G: Selection<SVGGElement, any, null, undefined>;
     let svgWidth: number, svgHeight: number;
     const xFactorUk = this.xFactorUk = 0.4859626225320041, yFactorUk = this.yFactorUk = 0.16291388766840606;
@@ -85,6 +88,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     let pieData : any;
     let processedStocks : any;
     let graphTypes = this.graphTypes;
+        
     processedStocks = this.processedStocks = this.processCalculations(Stocks);
     this.stockData = JSON.stringify(processedStocks);
     pieData = this.createPieData(processedStocks);
@@ -92,7 +96,7 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     d3ParentElement = d3.select(this.parentNativeElement);
     d3Svg = this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
     d3SvgGraph = this.d3SvgGraph = d3ParentElement.select<SVGSVGElement>('.graph');
-    
+    d3SvgDetails = this.d3SvgDetails = d3ParentElement.select<SVGSVGElement>('.details');
     this.drawCircles();
     this.drawPieCharts(pieData);
     this.graphTypes = {
@@ -349,12 +353,13 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
 
     var arc : any= d3.arc()
        .innerRadius(20).outerRadius(40);
+
     var labelArc : any= d3.arc()
        .innerRadius(55).outerRadius(55);
 
     var pie = d3.pie()
       .value(function(d: any){ return d.value });
- 
+          
     var pies = d3Svg.selectAll('.pie')
       .data(pieData)
       .enter()
@@ -378,6 +383,8 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .style("fill", "black")
       .text(function(d: any) { return "Average Return: " + d.averageReturn})
 
+    let tooltip = this.d3.select('.toolTip').append("div").attr("class", "toolTip");
+    
     pies.selectAll('.slice')
       .data(function(d: any){
          return pie([d.data[0], d.data[1]]) })
@@ -388,11 +395,32 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .style('fill', function(d,i: any){
         return color(i)
       })
-      .on("mouseover", mouseOver);
-      
-    function mouseOver(){
-      console.log("here");
-    }
+      .on('mouseover', function(d : any) {  
+       // tooltip.select('.company').html(d.data.name);     
+       // tooltip.select('.value').html("Price: " + d.data.value);          
+       // tooltip.style('display', 'block');    
+      })     
+      .on('mouseout', function() {        
+        //tooltip.style('display', 'none');     
+      });  
+    
+     pies
+      .on('mouseover', function(d : any) { 
+        tooltip.style("left", d3.event.pageX+10+"px");
+        tooltip.style("top", d3.event.pageY-25+"px");
+        tooltip.style("display", "inline-block");
+        tooltip.html("Average Daily Return:" + d.averageDailyReturn+"<br>"+"%");
+        console.log(d3.event.pageX+10);
+        console.log(d3.event.pageY-25);
+        console.log("Average Daily Return:" + d.averageDailyReturn+"<br>"+"%");
+        //tooltip.select('.average-daily-return').html();     
+        //tooltip.select('.average-return').html("Average Return:" + d.averageReturn);     
+        //tooltip.style('display', 'block');    
+      })     
+      .on('mouseout', function() {        
+        tooltip.style('display', 'none');     
+      });  
+
     /*
     pies.selectAll('.slice')
       .data(function(d: any){
@@ -452,29 +480,29 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       {
           origin: 'USA',
           destination: {
-              latitude: 20,
-              longitude: -57
+   latitude: 20,
+   longitude: -57
           },
           options: {
-            strokeWidth: 3,
-            strokeColor: '#747474',
-            greatArc: true,
-            animationSpeed: 1000,
-            arcSharpness: 0
+ strokeWidth: 3,
+ strokeColor: '#747474',
+ greatArc: true,
+ animationSpeed: 1000,
+ arcSharpness: 0
           }
       },
       {
           origin: 'GBR',
           destination: {
-              latitude: 70,
-              longitude: -5
+   latitude: 70,
+   longitude: -5
           },
           options: {
-            strokeWidth: 3,
-            strokeColor: '#747474',
-            greatArc: false,
-            animationSpeed: 1000,
-            arcSharpness: 0
+ strokeWidth: 3,
+ strokeColor: '#747474',
+ greatArc: false,
+ animationSpeed: 1000,
+ arcSharpness: 0
           }
       }
     ],  {strokeWidth: 1, arcSharpness: 1.4});
