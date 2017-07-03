@@ -1,11 +1,11 @@
 <div class="container">
   <div class="row">
     <div class="col col-lg-2 col-md-2 col-sm-2">
-      <label> Bought On: </label>
+      <label> From: </label>
       <my-date-picker placeholder="27/06/2016" [options]="myDatePickerOptions" (dateChanged)="startDateChanged($event)"></my-date-picker>
     </div>
     <div class="col col-lg-2 col-md-2 col-sm-2">
-      <label> Sold On: </label>
+      <label> To: </label>
       <my-date-picker placeholder="27/06/2017" [options]="myDatePickerOptions" (dateChanged)="endDateChanged($event)"></my-date-picker>
     </div>
     <div class="col col-lg-8 col-md-8 col-sm-8">

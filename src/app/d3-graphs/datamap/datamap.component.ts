@@ -398,8 +398,8 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
       .style("fill", "black")
       .text(function(d: any) { return "Average Return: " + d.averageReturn})
 
-    let tooltip = this.d3.select('.toolTip').append("div").attr("class", "toolTip");
-    
+    let tooltip = d3.select(".datamaps-hoverover");
+              
     pies.selectAll('.slice')
       .data(function(d: any){
          return pie([d.data[0], d.data[1]]) })
@@ -414,6 +414,19 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
        // tooltip.select('.company').html(d.data.name);     
        // tooltip.select('.value').html("Price: " + d.data.value);          
        // tooltip.style('display', 'block');    
+       tooltip.html('<div class="hoverinfo">' 
+              + '<strong>' 
+              + d.data.name 
+              + '</strong> <br>'
+              + 'Price: <strong>' 
+              + d.value 
+              + '</strong>'
+              +  '</div>')
+          //.style("left", d3.event.pageX+10+"px")
+          //.style("top", d3.event.pageY-25+"px")
+          .style('left', ( d3.event.pageX) + "px")
+          .style('top', ( (d3.event.pageY - 150)) + "px")
+          .style("display", "inline-block");
       })     
       .on('mouseout', function() {        
         //tooltip.style('display', 'none');     
@@ -421,14 +434,9 @@ export class DatamapComponent implements OnInit, OnChanges, OnDestroy {
     
      pies
       .on('mouseover', function(d : any) { 
-        tooltip.style("left", d3.event.pageX+10+"px");
-        tooltip.style("top", d3.event.pageY-25+"px");
-        tooltip.style("display", "inline-block");
-        tooltip.html("Average Daily Return:" + d.averageDailyReturn+"<br>"+"%");
-        console.log(d3.event.pageX+10);
-        console.log(d3.event.pageY-25);
-        console.log("Average Daily Return:" + d.averageDailyReturn+"<br>"+"%");
-        //tooltip.select('.average-daily-return').html();     
+        
+        
+        
         //tooltip.select('.average-return').html("Average Return:" + d.averageReturn);     
         //tooltip.style('display', 'block');    
       })     

@@ -113,7 +113,7 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
         .enter().append<SVGGElement>('g')
         .attr("fill", "none")
         .attr("class", "stock")
-        .on("mouseclick", mousemove);
+        .on("mouseover", mousemove);
 
       stock.append('path')
         .attr("class", "line")
@@ -153,38 +153,25 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
       
       let days = Math.ceil((dateData[dateData.length-1].setHours(0, 0, 0, 0) - dateData[0].setHours(0, 0, 0, 0)) / (1000 * 3600 * 24)); 
       console.log(days);
-      /*
+      
       if(days > 180){
-        xAxis.tickFormat(d3.timeFormat("%d"));
+        xAxis.tickFormat(d3.timeFormat("%b"));
       }
       else{
         xAxis.tickFormat(d3.timeFormat("%d-%b"));
       }
-      */
+
       if(days < 8){
         console.log("a");
         xAxis.ticks(Math.ceil(days));
-        xAxis.tickFormat(d3.timeFormat("%d-%b"));
-      }
-      else if(days < 60){
-        console.log("b");
-        xAxis.ticks(8);
-        xAxis.tickFormat(d3.timeFormat("%d-%b"));
-      }
-      else if(days < 120){
-        console.log("c");
-        xAxis.ticks(7);
-        xAxis.tickFormat(d3.timeFormat("%d-%b"));
       }
       else if(days < 180){
-        console.log("d");
+        console.log("b");
         xAxis.ticks(6);
-        xAxis.tickFormat(d3.timeFormat("%d-%b"));
       }
       else{
-        console.log("e");
+        console.log("c");
         xAxis.ticks(Math.ceil(days/30));
-        xAxis.tickFormat(d3.timeFormat("%b"));
       }
       
       let newD3Svg = d3Svg.transition();
@@ -233,8 +220,10 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
     function mousemove(){
       var x0 = x.invert(d3.mouse(this)[0]);
       var y0= d3.mouse(this)[1];
+      debugger;
       console.log("x0: " + x0);
       console.log("y0: " + y0);
+      
       //var i = this.stock(processedStocks, x0, 1);
       //var d0 = d3G.data[i - 1];
       //var d1 = d3G.data[i];
@@ -242,6 +231,7 @@ export class MultiSeriesLineChartComponent implements OnInit, OnDestroy {
        //console.log("d0" + d0);
         //console.log("d1" + d1);
     }
+    
   }
 
   ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
